@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>I-STYLE 店舗プロジェクト ダッシュボード v9.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      padding: 24px;
+      color: #222;
+    }
+
+    .app-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+      padding: 24px 28px 32px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .title-block h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .title-block span {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f2f2f7;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34c759;
+      box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      border-bottom: 1px solid #ececec;
+      padding-bottom: 4px;
+    }
+
+    .tab {
+      padding: 6px 14px 10px;
+      border-radius: 999px 999px 0 0;
+      font-size: 13px;
+      cursor: pointer;
+      color: #555;
+      background: transparent;
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .tab.active {
+      background: #f5f5f7;
+      color: #007aff;
+      font-weight: 600;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab-content {
+      margin-top: 18px;
+    }
+
+    /* コントロールバー */
+    .control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .control-left,
+    .control-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .select,
+    .btn {
+      appearance: none;
+      border-radius: 999px;
+      border: 1px solid #d2d2d7;
+      font-size: 12px;
+      padding: 6px 12px;
+      background: #f9f9fb;
+      color: #333;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .select:focus,
+    .btn:focus {
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+      border-color: #007aff;
+    }
+
+    .btn-primary {
+      background: #007aff;
+      color: #fff;
+      border-color: #007aff;
+    }
+
+    .btn-primary:hover {
+      background: #005ecb;
+      border-color: #005ecb;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: none;
+      color: #666;
+      padding-inline: 6px;
+    }
+
+    /* 階層＋ガントビュー */
+    .tree-gantt-shell {
+      margin-top: 4px;
+      border-radius: 18px;
+      border: 1px solid #e4e4e7;
+      background: #fbfbfd;
+      overflow: hidden;
+    }
+
+    .tree-gantt-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e5ea;
+      font-size: 12px;
+      background: linear-gradient(90deg, #f9fafb, #f3f4f6);
+    }
+
+    .tree-gantt-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #e5f2ff;
+      color: #007aff;
+      font-weight: 600;
+    }
+
+    .tree-gantt-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gantt-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(600px, 1fr);
+      border-top: 1px solid #ececec;
+      font-size: 12px;
+    }
+
+    .gantt-grid > div {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .tree-header,
+    .tree-row {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tree-header {
+      font-weight: 600;
+      color: #555;
+      background: #f9fafb;
+    }
+
+    .tree-row:hover {
+      background: #f5f9ff;
+    }
+
+    .tree-toggle {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid #d0d0d7;
+      font-size: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #fff;
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    .tree-toggle.empty {
+      border: none;
+      background: transparent;
+      cursor: default;
+    }
+
+    .level-badge {
+      padding: 1px 6px;
+      font-size: 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4f46e5;
+      flex-shrink: 0;
+    }
+
+    .task-title {
+      font-weight: 500;
+    }
+
+    .task-person {
+      font-size: 11px;
+      color: #666;
+      margin-left: 8px;
+    }
+
+    .task-status {
+      margin-left: auto;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f2f2f7;
+      color: #555;
+    }
+
+    .gantt-header-cell,
+    .gantt-cell {
+      border-left: 1px solid #f0f0f0;
+      position: relative;
+    }
+
+    .gantt-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      position: relative;
+    }
+
+    .gantt-inner {
+      position: relative;
+      height: 40px;
+    }
+
+    .gantt-header-days {
+      position: relative;
+      height: 40px;
+      display: flex;
+      align-items: stretch;
+      font-size: 10px;
+      color: #555;
+      background: #fdfdfd;
+    }
+
+    .gantt-day {
+      min-width: 32px;
+      max-width: 32px;
+      border-left: 1px solid #f0f0f0;
+      padding-top: 2px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .gantt-day:first-child {
+      border-left: none;
+    }
+
+    .gantt-day span {
+      display: block;
+      line-height: 1.2;
+    }
+
+    .gantt-day .dow {
+      font-size: 9px;
+      color: #999;
+    }
+
+    .gantt-day.weekend {
+      background: #faf5ff;
+    }
+
+    .gantt-inner-row {
+      position: relative;
+      height: 40px;
+    }
+
+    .gantt-inner-row::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        to right,
+        rgba(240, 240, 245, 0.9) 1px,
+        transparent 1px
+      );
+      background-size: 32px 100%;
+      pointer-events: none;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      top: 8px;
+      height: 24px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #007aff, #5856d6);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      padding: 0 10px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+      cursor: grab;
+      user-select: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gantt-bar.dragging {
+      opacity: 0.8;
+      cursor: grabbing;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .empty-hint {
+      padding: 32px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+
+    /* 他タブはプレースホルダ */
+    .placeholder {
+      padding: 40px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      background: #fafafa;
+      border-radius: 18px;
+      border: 1px dashed #e0e0e0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="title-block">
+        <h1>I-STYLE 店舗プロジェクト ダッシュボード v9.0</h1>
+        <span>新店オープンのタスク・期間・担当を一画面で俯瞰</span>
+      </div>
+      <div class="chip">
+        <span class="chip-dot"></span>
+        <span>オンライン同期中</span>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="gantt-tab">階層＋ガント</button>
+      <button class="tab" data-tab="tasks-tab">タスク一覧</button>
+      <button class="tab" data-tab="calendar-tab">カレンダー</button>
+      <button class="tab" data-tab="staff-tab">スタッフ</button>
+    </nav>
+
+    <!-- 階層＋ガント -->
+    <section id="gantt-tab" class="tab-content">
+      <div class="control-bar">
+        <div class="control-left">
+          <select id="store-select" class="select">
+            <option value="kawasaki">ラゾーナ川崎店</option>
+            <option value="aoyama">青山店（サンプル）</option>
+            <option value="shinjuku">新宿店（サンプル）</option>
+          </select>
+          <select id="year-select" class="select">
+            <option value="all">すべての期間</option>
+            <option value="2025">2025年</option>
+            <option value="2026">2026年</option>
+            <option value="2027">2027年</option>
+            <option value="2028">2028年</option>
+            <option value="2029">2029年</option>
+            <option value="2030">2030年</option>
+          </select>
+          <button class="btn btn-ghost" id="today-button">今日へ</button>
+        </div>
+        <div class="control-right">
+          <button class="btn btn-primary" id="expand-all">すべて展開</button>
+          <button class="btn" id="collapse-all">すべて折りたたみ</button>
+        </div>
+      </div>
+
+      <div class="tree-gantt-shell">
+        <div class="tree-gantt-toolbar">
+          <div class="tree-gantt-toolbar-left">
+            <span class="badge">ガントチャート</span>
+            <span>親子構造・日付・担当を一括で確認</span>
+          </div>
+          <div class="tree-gantt-toolbar-right">
+            <span style="font-size:11px;color:#777;">バーはドラッグで移動できます</span>
+          </div>
+        </div>
+
+        <div id="gantt-view"></div>
+      </div>
+    </section>
+
+    <!-- タスク一覧タブ（プレースホルダ） -->
+    <section id="tasks-tab" class="tab-content" style="display:none;">
+      <div class="placeholder">
+        タスク一覧ビューは後から詳細実装できます。<br />
+        まずは「階層＋ガント」で日程と担当の整理に集中してください。
+      </div>
+    </section>
+
+    <!-- カレンダータブ（プレースホルダ） -->
+    <section id="calendar-tab" class="tab-content" style="display:none;">
+      <div class="placeholder">
+        カレンダー（六曜・吉日など）の連携は次のステップで拡張可能です。
+      </div>
+    </section>
+
+    <!-- スタッフタブ（プレースホルダ） -->
+    <section id="staff-tab" class="tab-content" style="display:none;">
+      <div class="placeholder">
+        スタッフ名簿・役割分担の管理ページをここに追加できます。
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ==== データ定義（サンプル） ===================================== */
+
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const PX_PER_DAY = 32;
+
+    // ひとまずラゾーナ川崎店のタスクだけ入れています。
+    // 必要に応じてタスクを追加・編集してください。
+    const tasks = [
+      {
+        id: 1,
+        level: 1,
+        parentId: null,
+        name: "ラゾーナ川崎店オープンプロジェクト",
+        person: "秋山",
+        start: "2025-10-20",
+        end: "2026-03-31",
+        status: "進行中",
+      },
+      {
+        id: 2,
+        level: 2,
+        parentId: 1,
+        name: "プロジェクト設計・全体計画",
+        person: "秋山",
+        start: "2025-10-20",
+        end: "2025-11-15",
+        status: "進行中",
+      },
+      {
+        id: 3,
+        level: 2,
+        parentId: 1,
+        name: "デベロッパー・契約関連",
+        person: "竹之内",
+        start: "2025-10-20",
+        end: "2025-12-15",
+        status: "進行中",
+      },
+      {
+        id: 4,
+        level: 2,
+        parentId: 1,
+        name: "採用・人員・教育",
+        person: "秋山 / 嶌田",
+        start: "2025-11-01",
+        end: "2026-02-15",
+        status: "未着手",
+      },
+      {
+        id: 5,
+        level: 2,
+        parentId: 1,
+        name: "オペレーション・マニュアル・仕組み",
+        person: "嶌田 / 夏目",
+        start: "2025-11-10",
+        end: "2026-01-31",
+        status: "未着手",
+      },
+      {
+        id: 6,
+        level: 2,
+        parentId: 1,
+        name: "マーケティング・販促・ブランディング",
+        person: "草柳",
+        start: "2025-12-01",
+        end: "2026-02-28",
+        status: "未着手",
+      },
+      {
+        id: 7,
+        level: 3,
+        parentId: 2,
+        name: "オープン目標日とソフトオープン日を決定する",
+        person: "秋山",
+        start: "2025-10-20",
+        end: "2025-10-31",
+        status: "進行中",
+      },
+      {
+        id: 8,
+        level: 3,
+        parentId: 2,
+        name: "KGI/KPI・売上シミュレーションを作成",
+        person: "秋山",
+        start: "2025-10-25",
+        end: "2025-11-10",
+        status: "未着手",
+      },
+      {
+        id: 9,
+        level: 3,
+        parentId: 4,
+        name: "求人条件・人数計画の確定",
+        person: "秋山 / 嶌田",
+        start: "2025-11-05",
+        end: "2025-11-20",
+        status: "未着手",
+      },
+      {
+        id: 10,
+        level: 3,
+        parentId: 4,
+        name: "アルバイト・社員の採用面接",
+        person: "嶌田",
+        start: "2025-11-20",
+        end: "2026-01-10",
+        status: "未着手",
+      },
+      {
+        id: 11,
+        level: 3,
+        parentId: 6,
+        name: "SNS・館内告知の企画とスケジュール作成",
+        person: "草柳",
+        start: "2025-12-10",
+        end: "2026-01-15",
+        status: "未着手",
+      },
+      {
+        id: 12,
+        level: 3,
+        parentId: 6,
+        name: "オープン記念ノベルティ企画・発注",
+        person: "草柳 / 岡本",
+        start: "2025-12-20",
+        end: "2026-02-10",
+        status: "未着手",
+      },
+    ];
+
+    /* ==== 状態管理 ================================================ */
+
+    const expanded = new Set(); // 展開中のタスクID
+    let ganttStart = null;
+    let ganttEnd = null;
+
+    /* ==== 日付ユーティリティ ===================================== */
+
+    function parseDate(str) {
+      const [y, m, d] = str.split("-").map((v) => parseInt(v, 10));
+      return new Date(y, m - 1, d);
+    }
+
+    function formatDateForLabel(date) {
+      const m = date.getMonth() + 1;
+      const d = date.getDate();
+      return `${m}/${d}`;
+    }
+
+    function formatISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function computeGanttRange(yearFilter) {
+      const dates = [];
+      for (const t of tasks) {
+        if (!t.start || !t.end) continue;
+        const s = parseDate(t.start);
+        const e = parseDate(t.end);
+
+        if (yearFilter && yearFilter !== "all") {
+          const yf = parseInt(yearFilter, 10);
+          if (s.getFullYear() > yf || e.getFullYear() < yf) continue;
+        }
+
+        dates.push(s, e);
+      }
+      if (!dates.length) {
+        ganttStart = null;
+        ganttEnd = null;
+        return;
+      }
+      const min = new Date(Math.min(...dates.map((d) => d.getTime())));
+      const max = new Date(Math.max(...dates.map((d) => d.getTime())));
+
+      ganttStart = new Date(min.getFullYear(), min.getMonth(), min.getDate());
+      ganttEnd = new Date(max.getFullYear(), max.getMonth(), max.getDate());
+
+      // 少しマージン
+      ganttStart.setDate(ganttStart.getDate() - 3);
+      ganttEnd.setDate(ganttEnd.getDate() + 3);
+    }
+
+    /* ==== ガントヘッダー生成 ====================================== */
+
+    function buildHeaderDaysHtml() {
+      if (!ganttStart || !ganttEnd) return "";
+
+      const dayNames = "日月火水木金土";
+      const days = [];
+      const tmp = new Date(ganttStart.getTime());
+
+      while (tmp <= ganttEnd) {
+        const label = formatDateForLabel(tmp);
+        const dow = dayNames[tmp.getDay()];
+        const weekend = tmp.getDay() === 0 || tmp.getDay() === 6;
+        days.push(
+          `<div class="gantt-day ${weekend ? "weekend" : ""}">
+              <span>${label}</span>
+              <span class="dow">${dow}</span>
+           </div>`
+        );
+        tmp.setDate(tmp.getDate() + 1);
+      }
+      return days.join("");
+    }
+
+    function getTotalDays() {
+      if (!ganttStart || !ganttEnd) return 1;
+      const diff = (ganttEnd - ganttStart) / MS_PER_DAY;
+      return diff > 0 ? diff + 1 : 1;
+    }
+
+    /* ==== バーポジション算出（ガントとヘッダーを完全同期） ======= */
+
+    function calculateBarPixelPosition(startStr, endStr) {
+      if (!ganttStart || !ganttEnd) {
+        return { left: 0, width: 0 };
+      }
+      const s = parseDate(startStr);
+      const e = parseDate(endStr);
+      let startOffset = Math.round((s - ganttStart) / MS_PER_DAY);
+      let endOffset = Math.round((e - ganttStart) / MS_PER_DAY);
+
+      const totalDays = getTotalDays();
+      startOffset = Math.max(0, Math.min(totalDays - 1, startOffset));
+      endOffset = Math.max(0, Math.min(totalDays - 1, endOffset));
+      let duration = endOffset - startOffset + 1;
+      if (duration <= 0) duration = 1;
+
+      return {
+        left: startOffset * PX_PER_DAY,
+        width: duration * PX_PER_DAY,
+      };
+    }
+
+    /* ==== ツリー＋ガント描画 ======================================= */
+
+    function renderGanttView() {
+      const container = document.getElementById("gantt-view");
+      const yearFilter = document.getElementById("year-select").value;
+
+      computeGanttRange(yearFilter);
+
+      if (!ganttStart || !ganttEnd) {
+        container.innerHTML =
+          '<div class="empty-hint">この条件に該当するタスクがありません。</div>';
+        return;
+      }
+
+      const totalDays = getTotalDays();
+      const totalWidth = totalDays * PX_PER_DAY;
+      const headerDaysHtml = buildHeaderDaysHtml();
+
+      const topLevel = tasks.filter((t) => t.parentId === null);
+
+      if (topLevel.length === 0) {
+        container.innerHTML =
+          '<div class="empty-hint">タスクが登録されていません。</div>';
+        return;
+      }
+
+      const html = [];
+
+      // ヘッダー行
+      html.push(`
+        <div class="gantt-grid">
+          <div class="tree-header">
+            <span style="margin-left:16px;">タスク / 担当</span>
+          </div>
+          <div class="gantt-header-cell">
+            <div class="gantt-scroll" id="gantt-scroll-header">
+              <div class="gantt-header-days" style="width:${totalWidth}px;">
+                ${headerDaysHtml}
+              </div>
+            </div>
+          </div>
+      `);
+
+      // 行レンダリング
+      const renderRow = (task, depth = 0) => {
+        const hasChildren = tasks.some((t) => t.parentId === task.id);
+        const isExpanded = expanded.has(task.id);
+        const indentPx = depth * 16;
+
+        const barPos = calculateBarPixelPosition(task.start, task.end);
+        const label = `${formatDateForLabel(parseDate(task.start))}〜${formatDateForLabel(
+          parseDate(task.end)
+        )}`;
+
+        html.push(`
+          <div class="tree-row" data-task-row="${task.id}">
+            <div class="tree-row" style="padding-left:12px;">
+              <span class="tree-toggle ${
+                hasChildren ? "" : "empty"
+              }" onclick="${hasChildren ? `toggleExpand(${task.id})` : ""}">
+                ${hasChildren ? (isExpanded ? "−" : "+") : ""}
+              </span>
+              <span style="width:${indentPx}px;"></span>
+              <span class="level-badge">Lv${task.level}</span>
+              <span class="task-title">${task.name}</span>
+              <span class="task-person">👤 ${task.person}</span>
+              <span class="task-status">${task.status}</span>
+            </div>
+          </div>
+          <div class="gantt-cell">
+            <div class="gantt-scroll gantt-scroll-body">
+              <div class="gantt-inner-row" style="width:${totalWidth}px;">
+                <div
+                  class="gantt-bar"
+                  data-task-id="${task.id}"
+                  style="left:${barPos.left}px;width:${barPos.width}px;"
+                  title="${label}"
+                >
+                  ${label}｜${task.person}
+                </div>
+              </div>
+            </div>
+          </div>
+        `);
+
+        if (hasChildren && isExpanded) {
+          tasks
+            .filter((t) => t.parentId === task.id)
+            .forEach((child) => renderRow(child, depth + 1));
+        }
+      };
+
+      topLevel.forEach((t) => {
+        if (!expanded.has(t.id)) expanded.add(t.id); // 初回は展開
+        renderRow(t, 0);
+      });
+
+      html.push("</div>"); // .gantt-grid を閉じる
+
+      container.innerHTML = html.join("");
+
+      // スクロール同期
+      const headerScroll = document.getElementById("gantt-scroll-header");
+      const bodyScrolls = container.querySelectorAll(".gantt-scroll-body");
+      bodyScrolls.forEach((sc) => {
+        sc.addEventListener("scroll", () => {
+          headerScroll.scrollLeft = sc.scrollLeft;
+        });
+      });
+
+      attachDragHandlers();
+    }
+
+    /* ==== 展開・折りたたみ ======================================== */
+
+    function toggleExpand(id) {
+      if (expanded.has(id)) {
+        expanded.delete(id);
+      } else {
+        expanded.add(id);
+      }
+      renderGanttView();
+    }
+
+    function expandAll() {
+      tasks.forEach((t) => expanded.add(t.id));
+      renderGanttView();
+    }
+
+    function collapseAll() {
+      tasks.forEach((t) => expanded.delete(t.id));
+      renderGanttView();
+    }
+
+    /* ==== ドラッグ＆ドロップ（クリック解除でドロップ）============ */
+
+    let draggingId = null;
+    let dragStartX = 0;
+    let dragStartStartDate = null;
+    let dragStartEndDate = null;
+
+    function attachDragHandlers() {
+      const bars = document.querySelectorAll(".gantt-bar");
+      bars.forEach((bar) => {
+        bar.addEventListener("mousedown", onBarMouseDown);
+      });
+    }
+
+    function onBarMouseDown(e) {
+      const bar = e.currentTarget;
+      const id = Number(bar.getAttribute("data-task-id"));
+      const task = tasks.find((t) => t.id === id);
+      if (!task) return;
+
+      draggingId = id;
+      dragStartX = e.clientX;
+      dragStartStartDate = parseDate(task.start);
+      dragStartEndDate = parseDate(task.end);
+
+      bar.classList.add("dragging");
+
+      window.addEventListener("mousemove", onBarMouseMove);
+      window.addEventListener("mouseup", onBarMouseUp);
+    }
+
+    function onBarMouseMove(e) {
+      if (!draggingId || !ganttStart || !ganttEnd) return;
+
+      const task = tasks.find((t) => t.id === draggingId);
+      if (!task) return;
+
+      const deltaX = e.clientX - dragStartX;
+      const deltaDays = Math.round(deltaX / PX_PER_DAY);
+
+      const newStart = new Date(dragStartStartDate.getTime());
+      const newEnd = new Date(dragStartEndDate.getTime());
+      newStart.setDate(newStart.getDate() + deltaDays);
+      newEnd.setDate(newEnd.getDate() + deltaDays);
+
+      // 実データ更新
+      task.start = formatISO(newStart);
+      task.end = formatISO(newEnd);
+
+      // 途中も見た目を更新
+      renderGanttView();
+    }
+
+    function onBarMouseUp() {
+      const bars = document.querySelectorAll(".gantt-bar.dragging");
+      bars.forEach((b) => b.classList.remove("dragging"));
+
+      draggingId = null;
+      dragStartX = 0;
+      dragStartStartDate = null;
+      dragStartEndDate = null;
+
+      window.removeEventListener("mousemove", onBarMouseMove);
+      window.removeEventListener("mouseup", onBarMouseUp);
+    }
+
+    /* ==== タブ切り替え ============================================= */
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.getAttribute("data-tab");
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => (c.style.display = "none"));
+
+        tab.classList.add("active");
+        document.getElementById(target).style.display = "block";
+      });
+    });
+
+    /* ==== イベント初期化 =========================================== */
+
+    document
+      .getElementById("expand-all")
+      .addEventListener("click", expandAll);
+    document
+      .getElementById("collapse-all")
+      .addEventListener("click", collapseAll);
+    document
+      .getElementById("year-select")
+      .addEventListener("change", renderGanttView);
+
+    document.getElementById("today-button").addEventListener("click", () => {
+      if (!ganttStart || !ganttEnd) return;
+      const today = new Date();
+      // 今日が範囲外なら何もしない
+      if (today < ganttStart || today > ganttEnd) return;
+
+      const daysFromStart = Math.round((today - ganttStart) / MS_PER_DAY);
+      const scrollX = daysFromStart * PX_PER_DAY - 200;
+
+      const headerScroll = document.getElementById("gantt-scroll-header");
+      headerScroll.scrollLeft = Math.max(scrollX, 0);
+    });
+
+    /* ==== 初期描画 ================================================= */
+
+    tasks.forEach((t) => expanded.add(t.id)); // 初期状態ですべて展開
+    renderGanttView();
+  </script>
+</body>
+</html>
