@@ -1,964 +1,2745 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>I-STYLE 店舗プロジェクト ダッシュボード v9.0</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <title>I-STYLE 新店オープン統合管理ダッシュボード</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-soft: rgba(102, 126, 234, 0.12);
+            --accent: #764ba2;
+            --bg: #f3f4f8;
+            --card-bg: #ffffff;
+            --border-soft: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --radius-lg: 18px;
+            --radius-xl: 22px;
+            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.18);
+            --transition-fast: 0.18s ease-out;
+        }
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f7;
-      padding: 24px;
-      color: #222;
-    }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, -sans-serif;
+            background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #f3f4f8 100%);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .app-shell {
-      max-width: 1400px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
-      padding: 24px 28px 32px;
-    }
+        body {
+            padding: 24px;
+        }
 
-    .app-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
+        .app-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(250,250,255,0.98));
+            border-radius: 26px;
+            box-shadow: var(--shadow-soft);
+            padding: 22px 26px 26px;
+            border: 1px solid rgba(255,255,255,0.8);
+            backdrop-filter: blur(18px);
+        }
 
-    .title-block h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
 
-    .title-block span {
-      display: inline-block;
-      margin-top: 4px;
-      font-size: 12px;
-      color: #999;
-    }
+        .title-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #f2f2f7;
-      font-size: 11px;
-      color: #666;
-    }
+        .title-main {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
 
-    .chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #34c759;
-      box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
-    }
+        .title-main h1 {
+            font-size: 22px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin: 0;
+        }
 
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      border-bottom: 1px solid #ececec;
-      padding-bottom: 4px;
-    }
+        .title-main span {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
 
-    .tab {
-      padding: 6px 14px 10px;
-      border-radius: 999px 999px 0 0;
-      font-size: 13px;
-      cursor: pointer;
-      color: #555;
-      background: transparent;
-      border: none;
-      outline: none;
-      transition: all 0.2s ease;
-    }
+        .title-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
 
-    .tab.active {
-      background: #f5f5f7;
-      color: #007aff;
-      font-weight: 600;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
-    }
+        .status-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
 
-    .tab-content {
-      margin-top: 18px;
-    }
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 4px 12px;
+            background: rgba(15,23,42,0.03);
+            border: 1px solid rgba(148,163,184,0.4);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
 
-    /* コントロールバー */
-    .control-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34,197,94,0.22);
+        }
 
-    .control-left,
-    .control-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        .status-label {
+            font-weight: 500;
+        }
 
-    .select,
-    .btn {
-      appearance: none;
-      border-radius: 999px;
-      border: 1px solid #d2d2d7;
-      font-size: 12px;
-      padding: 6px 12px;
-      background: #f9f9fb;
-      color: #333;
-      cursor: pointer;
-      outline: none;
-      transition: all 0.15s ease;
-    }
+        .status-time {
+            font-size: 10px;
+            color: #9ca3af;
+        }
 
-    .select:focus,
-    .btn:focus {
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
-      border-color: #007aff;
-    }
+        .view-switch {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 3px;
+            background: rgba(15,23,42,0.04);
+            border: 1px solid rgba(148,163,184,0.45);
+        }
 
-    .btn-primary {
-      background: #007aff;
-      color: #fff;
-      border-color: #007aff;
-    }
+        .view-btn {
+            border: none;
+            background: transparent;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #6b7280;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-fast);
+        }
 
-    .btn-primary:hover {
-      background: #005ecb;
-      border-color: #005ecb;
-    }
+        .view-btn.active {
+            background: #ffffff;
+            color: #111827;
+            box-shadow: 0 6px 14px rgba(15,23,42,0.16);
+        }
 
-    .btn-ghost {
-      background: transparent;
-      border: none;
-      color: #666;
-      padding-inline: 6px;
-    }
+        .view-btn span.icon {
+            font-size: 13px;
+        }
 
-    /* 階層＋ガントビュー */
-    .tree-gantt-shell {
-      margin-top: 4px;
-      border-radius: 18px;
-      border: 1px solid #e4e4e7;
-      background: #fbfbfd;
-      overflow: hidden;
-    }
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
 
-    .tree-gantt-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border-bottom: 1px solid #e5e5ea;
-      font-size: 12px;
-      background: linear-gradient(90deg, #f9fafb, #f3f4f6);
-    }
+        .top-controls-left,
+        .top-controls-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
 
-    .tree-gantt-toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .select,
+        .btn {
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+            padding: 6px 12px;
+            background: #f9fafb;
+            color: #111827;
+            outline: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
 
-    .badge {
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      background: #e5f2ff;
-      color: #007aff;
-      font-weight: 600;
-    }
+        .select:focus,
+        .btn:focus {
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+            border-color: #6366f1;
+        }
 
-    .tree-gantt-toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(79,70,229,0.35);
+        }
 
-    .gantt-grid {
-      display: grid;
-      grid-template-columns: 320px minmax(600px, 1fr);
-      border-top: 1px solid #ececec;
-      font-size: 12px;
-    }
+        .btn-primary:hover {
+            filter: brightness(1.04);
+            transform: translateY(-0.5px);
+        }
 
-    .gantt-grid > div {
-      border-bottom: 1px solid #f0f0f0;
-    }
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            padding-inline: 4px;
+        }
 
-    .tree-header,
-    .tree-row {
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .btn-ghost:hover {
+            color: #111827;
+        }
 
-    .tree-header {
-      font-weight: 600;
-      color: #555;
-      background: #f9fafb;
-    }
+        .kpi-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
 
-    .tree-row:hover {
-      background: #f5f9ff;
-    }
+        .kpi-badge {
+            border-radius: 999px;
+            background: rgba(15,23,42,0.02);
+            border: 1px solid rgba(148,163,184,0.55);
+            padding: 4px 10px;
+            font-size: 11px;
+            color: #4b5563;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .tree-toggle {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      border: 1px solid #d0d0d7;
-      font-size: 10px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: #fff;
-      color: #555;
-      flex-shrink: 0;
-    }
+        .kpi-badge strong {
+            font-size: 11px;
+            color: #111827;
+        }
 
-    .tree-toggle.empty {
-      border: none;
-      background: transparent;
-      cursor: default;
-    }
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            padding: 4px;
+            background: rgba(148,163,184,0.08);
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.35);
+            margin-bottom: 16px;
+        }
 
-    .level-badge {
-      padding: 1px 6px;
-      font-size: 10px;
-      border-radius: 999px;
-      background: #eef2ff;
-      color: #4f46e5;
-      flex-shrink: 0;
-    }
+        .tab {
+            border-radius: 999px;
+            padding: 6px 14px;
+            border: none;
+            background: transparent;
+            font-size: 12px;
+            cursor: pointer;
+            color: #6b7280;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-fast);
+        }
 
-    .task-title {
-      font-weight: 500;
-    }
+        .tab-icon {
+            font-size: 14px;
+        }
 
-    .task-person {
-      font-size: 11px;
-      color: #666;
-      margin-left: 8px;
-    }
+        .tab.active {
+            background: #ffffff;
+            color: #111827;
+            box-shadow: 0 7px 20px rgba(15,23,42,0.18);
+        }
 
-    .task-status {
-      margin-left: auto;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #f2f2f7;
-      color: #555;
-    }
+        .tab-content {
+            display: none;
+        }
 
-    .gantt-header-cell,
-    .gantt-cell {
-      border-left: 1px solid #f0f0f0;
-      position: relative;
-    }
+        .tab-content.active {
+            display: block;
+        }
 
-    .gantt-scroll {
-      overflow-x: auto;
-      overflow-y: hidden;
-      position: relative;
-    }
+        .tab-panel {
+            border-radius: var(--radius-xl);
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(226,232,240,0.9);
+            box-shadow: 0 14px 30px rgba(15,23,42,0.12);
+            padding: 16px 18px 18px;
+        }
 
-    .gantt-inner {
-      position: relative;
-      height: 40px;
-    }
+        .tab-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 16px;
+        }
 
-    .gantt-header-days {
-      position: relative;
-      height: 40px;
-      display: flex;
-      align-items: stretch;
-      font-size: 10px;
-      color: #555;
-      background: #fdfdfd;
-    }
+        .tab-panel-header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
 
-    .gantt-day {
-      min-width: 32px;
-      max-width: 32px;
-      border-left: 1px solid #f0f0f0;
-      padding-top: 2px;
-      text-align: center;
-      flex-shrink: 0;
-    }
+        .tab-panel-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-    .gantt-day:first-child {
-      border-left: none;
-    }
+        .tab-panel-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+        }
 
-    .gantt-day span {
-      display: block;
-      line-height: 1.2;
-    }
+        .pill {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
 
-    .gantt-day .dow {
-      font-size: 9px;
-      color: #999;
-    }
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-    .gantt-day.weekend {
-      background: #faf5ff;
-    }
+        .panel-actions .btn {
+            font-size: 11px;
+            padding: 4px 10px;
+        }
 
-    .gantt-inner-row {
-      position: relative;
-      height: 40px;
-    }
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 16px;
+        }
 
-    .gantt-inner-row::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: linear-gradient(
-        to right,
-        rgba(240, 240, 245, 0.9) 1px,
-        transparent 1px
-      );
-      background-size: 32px 100%;
-      pointer-events: none;
-    }
+        .card {
+            border-radius: 18px;
+            background: radial-gradient(circle at top left, rgba(248,250,252,0.95), rgba(255,255,255,0.98));
+            border: 1px solid rgba(226,232,240,0.9);
+            box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+            padding: 12px 14px 14px;
+        }
 
-    .gantt-bar {
-      position: absolute;
-      top: 8px;
-      height: 24px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #007aff, #5856d6);
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      padding: 0 10px;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
-      cursor: grab;
-      user-select: none;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
 
-    .gantt-bar.dragging {
-      opacity: 0.8;
-      cursor: grabbing;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-    }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
 
-    .empty-hint {
-      padding: 32px;
-      text-align: center;
-      color: #888;
-      font-size: 13px;
-    }
+        .card-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+        }
 
-    /* 他タブはプレースホルダ */
-    .placeholder {
-      padding: 40px 16px;
-      text-align: center;
-      font-size: 13px;
-      color: #777;
-      background: #fafafa;
-      border-radius: 18px;
-      border: 1px dashed #e0e0e0;
-    }
-  </style>
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .card-body {
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        .card-body::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .card-body::-webkit-scrollbar-thumb {
+            background: rgba(148,163,184,0.6);
+            border-radius: 999px;
+        }
+
+        .card-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .task-table th,
+        .task-table td {
+            padding: 6px 6px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .task-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .task-table tr:hover td {
+            background: rgba(239,246,255,0.7);
+        }
+
+        .task-table tr.selected td {
+            background: rgba(219,234,254,0.95);
+        }
+
+        .level-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .level-1 { background: #eef2ff; color: #4f46e5; }
+        .level-2 { background: #dcfce7; color: #16a34a; }
+        .level-3 { background: #fee2e2; color: #b91c1c; }
+        .level-4 { background: #fef3c7; color: #d97706; }
+        .level-5 { background: #e0f2fe; color: #0369a1; }
+        .level-6 { background: #f5f3ff; color: #6d28d9; }
+
+        .status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .status-not-started {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-done {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-risk {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .assignee {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #374151;
+        }
+
+        .assignee-avatar {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .priority-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .priority-low {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .tree-gantt-container {
+            display: flex;
+            flex-direction: column;
+            border-radius: 18px;
+            border: 1px solid rgba(226,232,240,0.9);
+            background: radial-gradient(circle at top left, rgba(248,250,252,0.98), rgba(255,255,255,0.98));
+            box-shadow: 0 10px 25px rgba(148,163,184,0.18);
+            overflow: hidden;
+        }
+
+        .tree-gantt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: linear-gradient(90deg, rgba(239,246,255,0.95), rgba(249,250,251,0.96));
+            border-bottom: 1px solid rgba(226,232,240,0.9);
+        }
+
+        .tree-gantt-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tree-gantt-header-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tree-gantt-header-sub {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .tree-gantt-header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .tree-gantt-header-legend {
+            display: inline-flex;
+            gap: 10px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .tree-gantt-header-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 4px;
+            border-radius: 999px;
+            background: #6366f1;
+        }
+
+        .tree-gantt-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.8fr) minmax(480px, 1.2fr);
+            border-top: 1px solid rgba(226,232,240,0.9);
+            max-height: 460px;
+        }
+
+        .tree-column {
+            border-right: 1px solid rgba(226,232,240,0.9);
+            overflow: auto;
+        }
+
+        .gantt-column {
+            overflow: auto;
+            position: relative;
+        }
+
+        .tree-header-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 60px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4b5563;
+            padding: 6px 10px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .tree-rows {
+            font-size: 12px;
+        }
+
+        .tree-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 60px;
+            align-items: center;
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(243,244,246,0.95);
+            transition: background var(--transition-fast);
+        }
+
+        .tree-row:hover {
+            background: rgba(239,246,255,0.9);
+        }
+
+        .tree-cell-main {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #4b5563;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        .tree-toggle.empty {
+            border-color: transparent;
+            background: transparent;
+            cursor: default;
+        }
+
+        .tree-level-indicator {
+            width: 2px;
+            height: 18px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #6366f1, #a855f7);
+        }
+
+        .tree-task-title {
+            font-weight: 500;
+        }
+
+        .tree-assignee {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .tree-date {
+            font-size: 11px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .tree-status {
+            text-align: center;
+        }
+
+        .gantt-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .gantt-header-inner {
+            display: flex;
+            align-items: stretch;
+            position: relative;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .gantt-header-label {
+            font-size: 11px;
+            color: #6b7280;
+            padding: 5px 10px;
+            white-space: nowrap;
+        }
+
+        .gantt-header-days {
+            display: flex;
+            align-items: stretch;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .gantt-day {
+            min-width: 32px;
+            max-width: 32px;
+            border-left: 1px solid #e5e7eb;
+            font-size: 10px;
+            text-align: center;
+            padding-top: 3px;
+            color: #4b5563;
+            background: #f9fafb;
+        }
+
+        .gantt-day:first-child {
+            border-left: none;
+        }
+
+        .gantt-day span {
+            display: block;
+            line-height: 1.1;
+        }
+
+        .gantt-day .dow {
+            font-size: 9px;
+            color: #9ca3af;
+        }
+
+        .gantt-day.weekend {
+            background: #fef3c7;
+        }
+
+        .gantt-body {
+            position: relative;
+        }
+
+        .gantt-row {
+            position: relative;
+            height: 34px;
+            border-bottom: 1px solid rgba(243,244,246,0.95);
+        }
+
+        .gantt-row::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(to right, rgba(229,231,235,0.8) 1px, transparent 1px);
+            background-size: 32px 100%;
+        }
+
+        .gantt-track {
+            position: relative;
+            height: 100%;
+        }
+
+        .gantt-bar-mini {
+            position: absolute;
+            top: 5px;
+            height: 24px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            box-shadow: 0 6px 14px rgba(129,140,248,0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: grab;
+            user-select: none;
+            transition: box-shadow 0.12s ease-out, transform 0.12s ease-out, opacity 0.12s ease-out;
+        }
+
+        .gantt-bar-mini.dragging {
+            cursor: grabbing;
+            opacity: 0.9;
+            box-shadow: 0 10px 26px rgba(79,70,229,0.65);
+            transform: translateY(-1px);
+        }
+
+        .gantt-status-not-started {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+        }
+
+        .gantt-status-done {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .gantt-status-risk {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .empty-state strong {
+            color: #4b5563;
+        }
+
+        .pill-soft {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.03);
+            border: 1px dashed rgba(148,163,184,0.6);
+            padding: 4px 10px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .highlight {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding-bottom: 4px;
+        }
+
+        .calendar-day {
+            min-height: 64px;
+            border-radius: 12px;
+            border: 1px solid rgba(226,232,240,0.9);
+            background: #ffffff;
+            padding: 4px 6px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .calendar-day.today {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.35);
+        }
+
+        .calendar-date-label {
+            font-size: 10px;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .calendar-lucky {
+            font-size: 9px;
+            color: #10b981;
+        }
+
+        .calendar-unlucky {
+            font-size: 9px;
+            color: #ef4444;
+        }
+
+        .calendar-task-chip {
+            margin-top: 2px;
+            border-radius: 999px;
+            padding: 1px 4px;
+            font-size: 9px;
+            background: rgba(96,165,250,0.14);
+            color: #1d4ed8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .calendar-task-chip.important {
+            background: rgba(249,115,22,0.12);
+            color: #c2410c;
+        }
+
+        .calendar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .calendar-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .calendar-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .staff-card {
+            border-radius: 16px;
+            padding: 8px 10px;
+            background: rgba(249,250,251,0.98);
+            border: 1px solid rgba(226,232,240,0.9);
+            display: flex;
+            gap: 8px;
+        }
+
+        .staff-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 20%, #f97316, #7c2d12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .staff-info {
+            flex: 1;
+        }
+
+        .staff-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .staff-role {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .staff-skills {
+            font-size: 10px;
+            color: #4b5563;
+        }
+
+        .staff-tag-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .staff-tag {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.03);
+            color: #4b5563;
+        }
+
+        .store-select {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            background: rgba(15,23,42,0.02);
+            border: 1px solid rgba(209,213,219,0.9);
+            font-size: 11px;
+            color: #374151;
+        }
+
+        .store-select select {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 11px;
+            color: #111827;
+            padding-right: 12px;
+        }
+
+        .store-select select option {
+            font-size: 11px;
+        }
+
+        .quick-today {
+            font-size: 11px;
+            color: #6b7280;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .quick-today:hover {
+            color: #111827;
+        }
+
+        .section-label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .tag-soft-green {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(16,185,129,0.09);
+            color: #047857;
+        }
+
+        .tag-soft-blue {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(59,130,246,0.09);
+            color: #1d4ed8;
+        }
+
+        .tag-soft-orange {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(249,115,22,0.11);
+            color: #c2410c;
+        }
+
+        .summary-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .summary-pill {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.02);
+            border: 1px solid rgba(209,213,219,0.9);
+            color: #4b5563;
+        }
+
+        .today-marker {
+            font-size: 10px;
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal {
+            width: 560px;
+            max-width: 95vw;
+            max-height: 85vh;
+            overflow: auto;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 30px 70px rgba(15,23,42,0.45);
+            padding: 18px 20px 20px;
+            border: 1px solid rgba(226,232,240,0.9);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .modal-close-btn {
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-content {
+            font-size: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            border-radius: 9px;
+            border: 1px solid #d1d5db;
+            padding: 6px 7px;
+            font-size: 12px;
+            outline: none;
+            background: #f9fafb;
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(129,140,248,0.35);
+            background: #ffffff;
+        }
+
+        .form-textarea {
+            min-height: 54px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .badge-soft {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.03);
+            color: #4b5563;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                padding: 12px;
+            }
+            .app-shell {
+                padding: 18px;
+            }
+            .content-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            .staff-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .status-block {
+                align-items: flex-start;
+            }
+            .top-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .tab-bar {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            .tree-gantt-grid {
+                grid-template-columns: minmax(220px, 0.9fr) minmax(400px, 1.1fr);
+            }
+            .staff-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="app-shell">
+<div class="app-shell">
     <header class="app-header">
-      <div class="title-block">
-        <h1>I-STYLE 店舗プロジェクト ダッシュボード v9.0</h1>
-        <span>新店オープンのタスク・期間・担当を一画面で俯瞰</span>
-      </div>
-      <div class="chip">
-        <span class="chip-dot"></span>
-        <span>オンライン同期中</span>
-      </div>
+        <div class="title-block">
+            <div class="title-main">
+                <h1>I-STYLE PROJECT DASHBOARD</h1>
+                <span>STORE OPENING STANDARD</span>
+            </div>
+            <div class="title-sub">
+                ラゾーナ川崎店をはじめ、複数店舗の「新店オープン〜立ち上がり」を一元管理するためのダッシュボード
+            </div>
+        </div>
+        <div class="status-block">
+            <div class="status-chip" id="sync-status-chip">
+                <span class="status-dot" id="sync-status-dot"></span>
+                <span class="status-label" id="sync-status-label">Online / 自動保存中</span>
+            </div>
+            <div class="status-time" id="sync-status-time">最終更新: -</div>
+            <div class="view-switch">
+                <button class="view-btn active" data-view="both" onclick="setView('both')">
+                    <span class="icon">🧩</span><span>統合ビュー</span>
+                </button>
+                <button class="view-btn" data-view="tasks" onclick="setView('tasks')">
+                    <span class="icon">📋</span><span>タスク中心</span>
+                </button>
+                <button class="view-btn" data-view="gantt" onclick="setView('gantt')">
+                    <span class="icon">📊</span><span>ガントチャート</span>
+                </button>
+            </div>
+        </div>
     </header>
 
-    <nav class="tabs">
-      <button class="tab active" data-tab="gantt-tab">階層＋ガント</button>
-      <button class="tab" data-tab="tasks-tab">タスク一覧</button>
-      <button class="tab" data-tab="calendar-tab">カレンダー</button>
-      <button class="tab" data-tab="staff-tab">スタッフ</button>
+    <div class="top-controls">
+        <div class="top-controls-left">
+            <div class="store-select">
+                <span>店舗</span>
+                <select id="store-filter" onchange="onStoreChange()">
+                    <option value="all">全店舗</option>
+                    <option value="kawasaki">ラゾーナ川崎店</option>
+                    <option value="sample-aoyama">青山店（サンプル）</option>
+                    <option value="sample-yokohama">横浜店（サンプル）</option>
+                    <option value="sample-shinjuku">新宿店（サンプル）</option>
+                </select>
+            </div>
+            <select id="level-filter" class="select" onchange="onLevelFilterChange()">
+                <option value="all">レベル：すべて</option>
+                <option value="1">レベル1</option>
+                <option value="2">レベル2</option>
+                <option value="3">レベル3</option>
+                <option value="4">レベル4</option>
+                <option value="5">レベル5</option>
+                <option value="6">レベル6</option>
+                <option value="7">レベル7</option>
+                <option value="8">レベル8</option>
+            </select>
+            <button class="btn btn-ghost" onclick="scrollToToday()">
+                今日付近へ
+            </button>
+        </div>
+        <div class="top-controls-right">
+            <div class="kpi-badges">
+                <div class="kpi-badge">
+                    <span>🧾 タスク数</span>
+                    <strong id="kpi-total-tasks">0</strong>
+                </div>
+                <div class="kpi-badge">
+                    <span>✅ 完了</span>
+                    <strong id="kpi-done-tasks">0</strong>
+                </div>
+                <div class="kpi-badge">
+                    <span>⚠ リスク</span>
+                    <strong id="kpi-risk-tasks">0</strong>
+                </div>
+                <div class="kpi-badge">
+                    <span>📈 FL目標</span>
+                    <strong>55% ベース</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="tab-bar">
+        <button class="tab active" data-tab="tasks-tab" onclick="switchTab('tasks-tab')">
+            <span class="tab-icon">🧩</span>
+            <span>タスク＆階層ビュー</span>
+        </button>
+        <button class="tab" data-tab="calendar-tab" onclick="switchTab('calendar-tab')">
+            <span class="tab-icon">📅</span>
+            <span>カレンダー＆吉日</span>
+        </button>
+        <button class="tab" data-tab="staff-tab" onclick="switchTab('staff-tab')">
+            <span class="tab-icon">👥</span>
+            <span>スタッフ＆役割</span>
+        </button>
+        <button class="tab" data-tab="report-tab" onclick="switchTab('report-tab')">
+            <span class="tab-icon">📊</span>
+            <span>KPI＆レポート</span>
+        </button>
     </nav>
 
-    <!-- 階層＋ガント -->
-    <section id="gantt-tab" class="tab-content">
-      <div class="control-bar">
-        <div class="control-left">
-          <select id="store-select" class="select">
-            <option value="kawasaki">ラゾーナ川崎店</option>
-            <option value="aoyama">青山店（サンプル）</option>
-            <option value="shinjuku">新宿店（サンプル）</option>
-          </select>
-          <select id="year-select" class="select">
-            <option value="all">すべての期間</option>
-            <option value="2025">2025年</option>
-            <option value="2026">2026年</option>
-            <option value="2027">2027年</option>
-            <option value="2028">2028年</option>
-            <option value="2029">2029年</option>
-            <option value="2030">2030年</option>
-          </select>
-          <button class="btn btn-ghost" id="today-button">今日へ</button>
+    <section id="tasks-tab" class="tab-content active">
+        <div class="tab-panel">
+            <div class="tab-panel-header">
+                <div class="tab-panel-header-left">
+                    <div>
+                        <div class="tab-panel-title">
+                            タスク一覧 ＋ 階層ガントビュー
+                        </div>
+                        <div class="tab-panel-subtitle">
+                            レベル1〜3で「骨格」、レベル4以降で「現場の具体策」を整理
+                        </div>
+                    </div>
+                    <span class="pill">L1〜L8 全体設計</span>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn" onclick="openTaskModal()">＋ タスク追加</button>
+                    <button class="btn" onclick="exportTasks()">CSVエクスポート</button>
+                    <span class="section-label">※ Googleスプレッドシート連携用</span>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">タスク一覧（表形式）</div>
+                            <div class="card-subtitle">
+                                レベル、店舗、担当、期間、ステータスを一覧で確認
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <span class="badge-soft">クリックで選択／ダブルクリックで編集</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="task-table" id="task-table">
+                            <thead>
+                            <tr>
+                                <th style="width: 24px;"></th>
+                                <th style="width: 60px;">レベル</th>
+                                <th>タスク名</th>
+                                <th style="width: 120px;">親タスク</th>
+                                <th style="width: 120px;">店舗</th>
+                                <th style="width: 110px;">担当</th>
+                                <th style="width: 80px;">優先度</th>
+                                <th style="width: 110px;">開始日</th>
+                                <th style="width: 110px;">終了日</th>
+                                <th style="width: 90px;">ステータス</th>
+                            </tr>
+                            </thead>
+                            <tbody id="task-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">階層＋ガントチャート</div>
+                            <div class="card-subtitle">
+                                親子構造・担当・期間を1つの画面で俯瞰（バーをドラッグ＆ドロップで移動）
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn" onclick="expandAll()">すべて展開</button>
+                            <button class="btn" onclick="collapseAll()">すべて折りたたみ</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tree-gantt-container">
+                            <div class="tree-gantt-header">
+                                <div class="tree-gantt-header-left">
+                                    <span class="tree-gantt-header-title">ラゾーナ川崎店 オープンプロジェクト</span>
+                                    <span class="tree-gantt-header-sub">
+                                        2025年〜2030年まで対応 / ガントバーはドラッグで移動／マウスを離すとドロップ
+                                    </span>
+                                </div>
+                                <div class="tree-gantt-header-right">
+                                    <div class="tree-gantt-header-legend">
+                                        <span><span class="legend-color" style="background:#6366f1;"></span>進行中</span>
+                                        <span><span class="legend-color" style="background:#22c55e;"></span>完了</span>
+                                        <span><span class="legend-color" style="background:#ef4444;"></span>要注意</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tree-gantt-grid">
+                                <div class="tree-column">
+                                    <div class="tree-header-row">
+                                        <div>タスク / 階層</div>
+                                        <div style="text-align:center;">期間</div>
+                                        <div style="text-align:center;">担当</div>
+                                    </div>
+                                    <div class="tree-rows" id="tree-rows"></div>
+                                </div>
+                                <div class="gantt-column">
+                                    <div class="gantt-header">
+                                        <div class="gantt-header-inner">
+                                            <div class="gantt-header-label">
+                                                期間（日単位）
+                                            </div>
+                                            <div class="gantt-header-days" id="gantt-header-days"></div>
+                                        </div>
+                                    </div>
+                                    <div class="gantt-body" id="gantt-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="integrated-view-footer" style="padding-top:6px;font-size:11px;color:#6b7280;">
+                            バーは横方向へドラッグで日付移動できます（マウスを離した位置で確定）
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="control-right">
-          <button class="btn btn-primary" id="expand-all">すべて展開</button>
-          <button class="btn" id="collapse-all">すべて折りたたみ</button>
+    </section>
+
+    <section id="calendar-tab" class="tab-content">
+        <div class="tab-panel">
+            <div class="tab-panel-header">
+                <div class="tab-panel-header-left">
+                    <div>
+                        <div class="tab-panel-title">カレンダー ＋ 六曜・吉日</div>
+                        <div class="tab-panel-subtitle">
+                            タスクの締切・イベントを、六曜や一粒万倍日などと重ねて確認
+                        </div>
+                    </div>
+                    <span class="pill">毎月の運用会議用</span>
+                </div>
+                <div class="panel-actions">
+                    <div class="calendar-toolbar">
+                        <div class="calendar-toolbar-left">
+                            <button class="btn" onclick="changeMonth(-1)">◀ 前月</button>
+                            <button class="btn" onclick="goToThisMonth()">今月</button>
+                            <button class="btn" onclick="changeMonth(1)">次月 ▶</button>
+                        </div>
+                        <div class="calendar-toolbar-right">
+                            <span id="calendar-month-label" class="section-label"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <div class="tree-gantt-shell">
-        <div class="tree-gantt-toolbar">
-          <div class="tree-gantt-toolbar-left">
-            <span class="badge">ガントチャート</span>
-            <span>親子構造・日付・担当を一括で確認</span>
-          </div>
-          <div class="tree-gantt-toolbar-right">
-            <span style="font-size:11px;color:#777;">バーはドラッグで移動できます</span>
-          </div>
+    <section id="staff-tab" class="tab-content">
+        <div class="tab-panel">
+            <div class="tab-panel-header">
+                <div class="tab-panel-header-left">
+                    <div>
+                        <div class="tab-panel-title">スタッフ・役割分担</div>
+                        <div class="tab-panel-subtitle">
+                            誰が何を担当しているかを可視化し、依頼・相談の窓口を明確にする
+                        </div>
+                    </div>
+                    <span class="pill">本部 × 店舗の連携</span>
+                </div>
+                <div class="panel-actions">
+                    <span class="section-label">※ 将来的に「権限管理」「アラーム送信先」の紐付けも可能</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="staff-grid" id="staff-grid">
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="gantt-view"></div>
-      </div>
     </section>
 
-    <!-- タスク一覧タブ（プレースホルダ） -->
-    <section id="tasks-tab" class="tab-content" style="display:none;">
-      <div class="placeholder">
-        タスク一覧ビューは後から詳細実装できます。<br />
-        まずは「階層＋ガント」で日程と担当の整理に集中してください。
-      </div>
+    <section id="report-tab" class="tab-content">
+        <div class="tab-panel">
+            <div class="tab-panel-header">
+                <div class="tab-panel-header-left">
+                    <div>
+                        <div class="tab-panel-title">KPI / FL / 進捗レポート</div>
+                        <div class="tab-panel-subtitle">
+                            売上・FL・タスク進行率などを、店長会議や本部会議で共有するための叩き台
+                        </div>
+                    </div>
+                    <span class="pill">PL・FL連携前提の枠組み</span>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn" onclick="generateSimpleReport()">本日のサマリー生成</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">テキストレポート（メモ用）</div>
+                        <div class="card-subtitle">コピーして議事録やChatworkに貼り付け可能</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn" onclick="copyReport()">コピー</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <textarea id="report-text" class="form-textarea" style="width:100%; min-height:220px;"></textarea>
+                </div>
+            </div>
+        </div>
     </section>
+</div>
 
-    <!-- カレンダータブ（プレースホルダ） -->
-    <section id="calendar-tab" class="tab-content" style="display:none;">
-      <div class="placeholder">
-        カレンダー（六曜・吉日など）の連携は次のステップで拡張可能です。
-      </div>
-    </section>
+<div class="modal-backdrop" id="task-modal-backdrop">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="task-modal-title">タスク追加</div>
+            <button class="modal-close-btn" onclick="closeTaskModal()">×</button>
+        </div>
+        <div class="modal-content">
+            <form id="task-form" onsubmit="saveTaskFromModal(event)">
+                <input type="hidden" id="task-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">レベル</label>
+                        <select id="task-level" class="form-select">
+                            <option value="1">レベル1（プロジェクト全体）</option>
+                            <option value="2">レベル2（大分類）</option>
+                            <option value="3">レベル3（中分類）</option>
+                            <option value="4">レベル4（具体タスク）</option>
+                            <option value="5">レベル5</option>
+                            <option value="6">レベル6</option>
+                            <option value="7">レベル7</option>
+                            <option value="8">レベル8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">店舗</label>
+                        <select id="task-store" class="form-select">
+                            <option value="kawasaki">ラゾーナ川崎店</option>
+                            <option value="sample-aoyama">青山店（サンプル）</option>
+                            <option value="sample-yokohama">横浜店（サンプル）</option>
+                            <option value="sample-shinjuku">新宿店（サンプル）</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">タスク名</label>
+                        <input type="text" id="task-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">親タスク</label>
+                        <select id="task-parent" class="form-select">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">担当者</label>
+                        <input type="text" id="task-person" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">優先度</label>
+                        <select id="task-priority" class="form-select">
+                            <option value="medium">中</option>
+                            <option value="high">高</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">開始日</label>
+                        <input type="date" id="task-start" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">終了日</label>
+                        <input type="date" id="task-end" class="form-input">
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">ステータス</label>
+                        <select id="task-status" class="form-select">
+                            <option value="not-started">未着手</option>
+                            <option value="in-progress">進行中</option>
+                            <option value="done">完了</option>
+                            <option value="risk">要注意</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">メモ</label>
+                        <textarea id="task-memo" class="form-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="deleteTaskFromModal()">削除</button>
+                    <button type="button" class="btn" onclick="closeTaskModal()">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    <!-- スタッフタブ（プレースホルダ） -->
-    <section id="staff-tab" class="tab-content" style="display:none;">
-      <div class="placeholder">
-        スタッフ名簿・役割分担の管理ページをここに追加できます。
-      </div>
-    </section>
-  </div>
-
-  <script>
-    /* ==== データ定義（サンプル） ===================================== */
+<script>
+    let tasks = [];
+    let currentFilter = 'all';
+    let selectedTasks = new Set();
+    let currentView = 'both';
+    let expandedTasks = new Set();
+    let taskHistory = {};
+    let taskComments = {};
+    let taskAttachments = {};
+    let currentCalendarMonth = new Date();
+    let notifications = [];
+    let reportHistory = [];
+    let syncStatus = 'online';
 
     const MS_PER_DAY = 1000 * 60 * 60 * 24;
-    const PX_PER_DAY = 32;
+    let ganttProjectStart = null;
+    let ganttProjectEnd = null;
 
-    // ひとまずラゾーナ川崎店のタスクだけ入れています。
-    // 必要に応じてタスクを追加・編集してください。
-    const tasks = [
-      {
-        id: 1,
-        level: 1,
-        parentId: null,
-        name: "ラゾーナ川崎店オープンプロジェクト",
-        person: "秋山",
-        start: "2025-10-20",
-        end: "2026-03-31",
-        status: "進行中",
-      },
-      {
-        id: 2,
-        level: 2,
-        parentId: 1,
-        name: "プロジェクト設計・全体計画",
-        person: "秋山",
-        start: "2025-10-20",
-        end: "2025-11-15",
-        status: "進行中",
-      },
-      {
-        id: 3,
-        level: 2,
-        parentId: 1,
-        name: "デベロッパー・契約関連",
-        person: "竹之内",
-        start: "2025-10-20",
-        end: "2025-12-15",
-        status: "進行中",
-      },
-      {
-        id: 4,
-        level: 2,
-        parentId: 1,
-        name: "採用・人員・教育",
-        person: "秋山 / 嶌田",
-        start: "2025-11-01",
-        end: "2026-02-15",
-        status: "未着手",
-      },
-      {
-        id: 5,
-        level: 2,
-        parentId: 1,
-        name: "オペレーション・マニュアル・仕組み",
-        person: "嶌田 / 夏目",
-        start: "2025-11-10",
-        end: "2026-01-31",
-        status: "未着手",
-      },
-      {
-        id: 6,
-        level: 2,
-        parentId: 1,
-        name: "マーケティング・販促・ブランディング",
-        person: "草柳",
-        start: "2025-12-01",
-        end: "2026-02-28",
-        status: "未着手",
-      },
-      {
-        id: 7,
-        level: 3,
-        parentId: 2,
-        name: "オープン目標日とソフトオープン日を決定する",
-        person: "秋山",
-        start: "2025-10-20",
-        end: "2025-10-31",
-        status: "進行中",
-      },
-      {
-        id: 8,
-        level: 3,
-        parentId: 2,
-        name: "KGI/KPI・売上シミュレーションを作成",
-        person: "秋山",
-        start: "2025-10-25",
-        end: "2025-11-10",
-        status: "未着手",
-      },
-      {
-        id: 9,
-        level: 3,
-        parentId: 4,
-        name: "求人条件・人数計画の確定",
-        person: "秋山 / 嶌田",
-        start: "2025-11-05",
-        end: "2025-11-20",
-        status: "未着手",
-      },
-      {
-        id: 10,
-        level: 3,
-        parentId: 4,
-        name: "アルバイト・社員の採用面接",
-        person: "嶌田",
-        start: "2025-11-20",
-        end: "2026-01-10",
-        status: "未着手",
-      },
-      {
-        id: 11,
-        level: 3,
-        parentId: 6,
-        name: "SNS・館内告知の企画とスケジュール作成",
-        person: "草柳",
-        start: "2025-12-10",
-        end: "2026-01-15",
-        status: "未着手",
-      },
-      {
-        id: 12,
-        level: 3,
-        parentId: 6,
-        name: "オープン記念ノベルティ企画・発注",
-        person: "草柳 / 岡本",
-        start: "2025-12-20",
-        end: "2026-02-10",
-        status: "未着手",
-      },
-    ];
+    setInterval(() => {
+        simulateSync();
+    }, 5000);
 
-    /* ==== 状態管理 ================================================ */
+    function simulateSync() {
+        const statusDot = document.getElementById('sync-status-dot');
+        const statusLabel = document.getElementById('sync-status-label');
+        const statusTime = document.getElementById('sync-status-time');
 
-    const expanded = new Set(); // 展開中のタスクID
-    let ganttStart = null;
-    let ganttEnd = null;
-
-    /* ==== 日付ユーティリティ ===================================== */
-
-    function parseDate(str) {
-      const [y, m, d] = str.split("-").map((v) => parseInt(v, 10));
-      return new Date(y, m - 1, d);
-    }
-
-    function formatDateForLabel(date) {
-      const m = date.getMonth() + 1;
-      const d = date.getDate();
-      return `${m}/${d}`;
-    }
-
-    function formatISO(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
-
-    function computeGanttRange(yearFilter) {
-      const dates = [];
-      for (const t of tasks) {
-        if (!t.start || !t.end) continue;
-        const s = parseDate(t.start);
-        const e = parseDate(t.end);
-
-        if (yearFilter && yearFilter !== "all") {
-          const yf = parseInt(yearFilter, 10);
-          if (s.getFullYear() > yf || e.getFullYear() < yf) continue;
+        if (syncStatus === 'online') {
+            statusDot.style.background = '#22c55e';
+            statusDot.style.boxShadow = '0 0 0 4px rgba(34,197,94,0.22)';
+            statusLabel.textContent = 'Online / 自動保存中';
+            const now = new Date();
+            statusTime.textContent = '最終更新: ' + now.toLocaleString('ja-JP', { hour12:false });
+        } else {
+            statusDot.style.background = '#f97316';
+            statusDot.style.boxShadow = '0 0 0 4px rgba(249,115,22,0.25)';
+            statusLabel.textContent = 'Offline / ローカル保存中';
         }
-
-        dates.push(s, e);
-      }
-      if (!dates.length) {
-        ganttStart = null;
-        ganttEnd = null;
-        return;
-      }
-      const min = new Date(Math.min(...dates.map((d) => d.getTime())));
-      const max = new Date(Math.max(...dates.map((d) => d.getTime())));
-
-      ganttStart = new Date(min.getFullYear(), min.getMonth(), min.getDate());
-      ganttEnd = new Date(max.getFullYear(), max.getMonth(), max.getDate());
-
-      // 少しマージン
-      ganttStart.setDate(ganttStart.getDate() - 3);
-      ganttEnd.setDate(ganttEnd.getDate() + 3);
     }
 
-    /* ==== ガントヘッダー生成 ====================================== */
+    function initializeStaff() {
+        const staff = [
+            {
+                name: '秋山',
+                initials: 'A',
+                role: '全体計画・教育',
+                skills: ['PM', '教育設計', '店舗運営'],
+                tags: ['本部', 'プロジェクトリーダー', '採用・教育']
+            },
+            {
+                name: '竹之内',
+                initials: 'T',
+                role: '契約・デベロッパー窓口',
+                skills: ['契約交渉', 'デベロッパー対応'],
+                tags: ['本部', '契約', 'リーシング']
+            },
+            {
+                name: '嶌田',
+                initials: 'S',
+                role: '採用・オペレーション',
+                skills: ['採用面接', '店舗オペレーション'],
+                tags: ['現場責任者', '採用', 'OJT']
+            },
+            {
+                name: '夏目',
+                initials: 'N',
+                role: 'オペレーション改善',
+                skills: ['接客', 'オペレーション設計'],
+                tags: ['現場', 'OJT', '品質']
+            },
+            {
+                name: '草柳',
+                initials: 'K',
+                role: 'SNS・マーケティング',
+                skills: ['SNS運用', '販促企画'],
+                tags: ['マーケ', '告知', 'ブランド']
+            },
+            {
+                name: '岡本',
+                initials: 'O',
+                role: 'POP・デザイン',
+                skills: ['デザイン', 'POP制作'],
+                tags: ['デザイン', '販促ツール']
+            }
+        ];
 
-    function buildHeaderDaysHtml() {
-      if (!ganttStart || !ganttEnd) return "";
-
-      const dayNames = "日月火水木金土";
-      const days = [];
-      const tmp = new Date(ganttStart.getTime());
-
-      while (tmp <= ganttEnd) {
-        const label = formatDateForLabel(tmp);
-        const dow = dayNames[tmp.getDay()];
-        const weekend = tmp.getDay() === 0 || tmp.getDay() === 6;
-        days.push(
-          `<div class="gantt-day ${weekend ? "weekend" : ""}">
-              <span>${label}</span>
-              <span class="dow">${dow}</span>
-           </div>`
-        );
-        tmp.setDate(tmp.getDate() + 1);
-      }
-      return days.join("");
-    }
-
-    function getTotalDays() {
-      if (!ganttStart || !ganttEnd) return 1;
-      const diff = (ganttEnd - ganttStart) / MS_PER_DAY;
-      return diff > 0 ? diff + 1 : 1;
-    }
-
-    /* ==== バーポジション算出（ガントとヘッダーを完全同期） ======= */
-
-    function calculateBarPixelPosition(startStr, endStr) {
-      if (!ganttStart || !ganttEnd) {
-        return { left: 0, width: 0 };
-      }
-      const s = parseDate(startStr);
-      const e = parseDate(endStr);
-      let startOffset = Math.round((s - ganttStart) / MS_PER_DAY);
-      let endOffset = Math.round((e - ganttStart) / MS_PER_DAY);
-
-      const totalDays = getTotalDays();
-      startOffset = Math.max(0, Math.min(totalDays - 1, startOffset));
-      endOffset = Math.max(0, Math.min(totalDays - 1, endOffset));
-      let duration = endOffset - startOffset + 1;
-      if (duration <= 0) duration = 1;
-
-      return {
-        left: startOffset * PX_PER_DAY,
-        width: duration * PX_PER_DAY,
-      };
-    }
-
-    /* ==== ツリー＋ガント描画 ======================================= */
-
-    function renderGanttView() {
-      const container = document.getElementById("gantt-view");
-      const yearFilter = document.getElementById("year-select").value;
-
-      computeGanttRange(yearFilter);
-
-      if (!ganttStart || !ganttEnd) {
-        container.innerHTML =
-          '<div class="empty-hint">この条件に該当するタスクがありません。</div>';
-        return;
-      }
-
-      const totalDays = getTotalDays();
-      const totalWidth = totalDays * PX_PER_DAY;
-      const headerDaysHtml = buildHeaderDaysHtml();
-
-      const topLevel = tasks.filter((t) => t.parentId === null);
-
-      if (topLevel.length === 0) {
-        container.innerHTML =
-          '<div class="empty-hint">タスクが登録されていません。</div>';
-        return;
-      }
-
-      const html = [];
-
-      // ヘッダー行
-      html.push(`
-        <div class="gantt-grid">
-          <div class="tree-header">
-            <span style="margin-left:16px;">タスク / 担当</span>
-          </div>
-          <div class="gantt-header-cell">
-            <div class="gantt-scroll" id="gantt-scroll-header">
-              <div class="gantt-header-days" style="width:${totalWidth}px;">
-                ${headerDaysHtml}
-              </div>
-            </div>
-          </div>
-      `);
-
-      // 行レンダリング
-      const renderRow = (task, depth = 0) => {
-        const hasChildren = tasks.some((t) => t.parentId === task.id);
-        const isExpanded = expanded.has(task.id);
-        const indentPx = depth * 16;
-
-        const barPos = calculateBarPixelPosition(task.start, task.end);
-        const label = `${formatDateForLabel(parseDate(task.start))}〜${formatDateForLabel(
-          parseDate(task.end)
-        )}`;
-
-        html.push(`
-          <div class="tree-row" data-task-row="${task.id}">
-            <div class="tree-row" style="padding-left:12px;">
-              <span class="tree-toggle ${
-                hasChildren ? "" : "empty"
-              }" onclick="${hasChildren ? `toggleExpand(${task.id})` : ""}">
-                ${hasChildren ? (isExpanded ? "−" : "+") : ""}
-              </span>
-              <span style="width:${indentPx}px;"></span>
-              <span class="level-badge">Lv${task.level}</span>
-              <span class="task-title">${task.name}</span>
-              <span class="task-person">👤 ${task.person}</span>
-              <span class="task-status">${task.status}</span>
-            </div>
-          </div>
-          <div class="gantt-cell">
-            <div class="gantt-scroll gantt-scroll-body">
-              <div class="gantt-inner-row" style="width:${totalWidth}px;">
-                <div
-                  class="gantt-bar"
-                  data-task-id="${task.id}"
-                  style="left:${barPos.left}px;width:${barPos.width}px;"
-                  title="${label}"
-                >
-                  ${label}｜${task.person}
+        const container = document.getElementById('staff-grid');
+        if (!container) return;
+        container.innerHTML = staff.map(member => `
+            <div class="staff-card">
+                <div class="staff-avatar">${member.initials}</div>
+                <div class="staff-info">
+                    <div class="staff-name">${member.name}</div>
+                    <div class="staff-role">${member.role}</div>
+                    <div class="staff-skills">${member.skills.join(' / ')}</div>
+                    <div class="staff-tag-row">
+                        ${member.tags.map(t => `<span class="staff-tag">${t}</span>`).join('')}
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-        `);
-
-        if (hasChildren && isExpanded) {
-          tasks
-            .filter((t) => t.parentId === task.id)
-            .forEach((child) => renderRow(child, depth + 1));
-        }
-      };
-
-      topLevel.forEach((t) => {
-        if (!expanded.has(t.id)) expanded.add(t.id); // 初回は展開
-        renderRow(t, 0);
-      });
-
-      html.push("</div>"); // .gantt-grid を閉じる
-
-      container.innerHTML = html.join("");
-
-      // スクロール同期
-      const headerScroll = document.getElementById("gantt-scroll-header");
-      const bodyScrolls = container.querySelectorAll(".gantt-scroll-body");
-      bodyScrolls.forEach((sc) => {
-        sc.addEventListener("scroll", () => {
-          headerScroll.scrollLeft = sc.scrollLeft;
-        });
-      });
-
-      attachDragHandlers();
+        `).join('');
     }
 
-    /* ==== 展開・折りたたみ ======================================== */
+    function setView(view) {
+        currentView = view;
+        const buttons = document.querySelectorAll('.view-btn');
+        buttons.forEach(btn => {
+            const v = btn.getAttribute('data-view');
+            btn.classList.toggle('active', v === view);
+        });
 
-    function toggleExpand(id) {
-      if (expanded.has(id)) {
-        expanded.delete(id);
-      } else {
-        expanded.add(id);
-      }
-      renderGanttView();
+        const tasksCard = document.querySelector('#task-table')?.closest('.card');
+        const ganttCard = document.querySelector('.tree-gantt-container')?.closest('.card');
+
+        if (!tasksCard || !ganttCard) return;
+
+        if (view === 'both') {
+            tasksCard.style.display = '';
+            ganttCard.style.display = '';
+        } else if (view === 'tasks') {
+            tasksCard.style.display = '';
+            ganttCard.style.display = 'none';
+        } else if (view === 'gantt') {
+            tasksCard.style.display = 'none';
+            ganttCard.style.display = '';
+        }
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-tab') === tabId);
+        });
+
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === tabId);
+        });
+    }
+
+    function onStoreChange() {
+        const select = document.getElementById('store-filter');
+        currentFilter = select.value;
+        renderTasks();
+        renderIntegratedView();
+        renderCalendar();
+    }
+
+    function onLevelFilterChange() {
+        renderTasks();
+        renderIntegratedView();
+    }
+
+    function openTaskModal(taskId = null) {
+        const backdrop = document.getElementById('task-modal-backdrop');
+        const title = document.getElementById('task-modal-title');
+        const form = document.getElementById('task-form');
+        form.reset();
+
+        document.getElementById('task-id').value = taskId || '';
+        updateParentOptions(taskId);
+
+        if (taskId) {
+            title.textContent = 'タスク編集';
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                document.getElementById('task-level').value = task.level || 1;
+                document.getElementById('task-store').value = task.store || 'kawasaki';
+                document.getElementById('task-name').value = task.name || '';
+                document.getElementById('task-parent').value = task.parent || '';
+                document.getElementById('task-person').value = task.person || '';
+                document.getElementById('task-priority').value = task.priority || 'medium';
+                document.getElementById('task-start').value = task.start || '';
+                document.getElementById('task-end').value = task.end || '';
+                document.getElementById('task-status').value = task.status || 'not-started';
+                document.getElementById('task-memo').value = task.memo || '';
+            }
+        } else {
+            title.textContent = 'タスク追加';
+            document.getElementById('task-store').value = document.getElementById('store-filter').value === 'all'
+                ? 'kawasaki'
+                : document.getElementById('store-filter').value;
+        }
+
+        backdrop.style.display = 'flex';
+    }
+
+    function closeTaskModal() {
+        const backdrop = document.getElementById('task-modal-backdrop');
+        backdrop.style.display = 'none';
+    }
+
+    function updateParentOptions(excludeTaskId = null) {
+        const parentSelect = document.getElementById('task-parent');
+        if (!parentSelect) return;
+
+        const options = ['<option value="">（親なし）</option>'];
+        tasks.forEach(t => {
+            if (excludeTaskId && t.id === excludeTaskId) return;
+            options.push(`<option value="${t.id}">[L${t.level}] ${t.name}</option>`);
+        });
+        parentSelect.innerHTML = options.join('');
+    }
+
+    function saveTaskFromModal(event) {
+        event.preventDefault();
+
+        const id = document.getElementById('task-id').value;
+        const level = parseInt(document.getElementById('task-level').value, 10);
+        const store = document.getElementById('task-store').value;
+        const name = document.getElementById('task-name').value.trim();
+        const parent = document.getElementById('task-parent').value || null;
+        const person = document.getElementById('task-person').value.trim();
+        const priority = document.getElementById('task-priority').value;
+        const start = document.getElementById('task-start').value;
+        const end = document.getElementById('task-end').value;
+        const status = document.getElementById('task-status').value;
+        const memo = document.getElementById('task-memo').value;
+
+        if (!name) {
+            alert('タスク名を入力してください。');
+            return;
+        }
+
+        if (id) {
+            const task = tasks.find(t => t.id === parseInt(id, 10));
+            if (task) {
+                task.level = level;
+                task.store = store;
+                task.name = name;
+                task.parent = parent;
+                task.person = person;
+                task.priority = priority;
+                task.start = start;
+                task.end = end;
+                task.status = status;
+                task.memo = memo;
+            }
+        } else {
+            const newId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+            tasks.push({
+                id: newId,
+                level,
+                store,
+                name,
+                parent,
+                person,
+                priority,
+                start,
+                end,
+                status,
+                memo
+            });
+        }
+
+        closeTaskModal();
+        renderTasks();
+        renderIntegratedView();
+        renderCalendar();
+        saveToLocalStorage();
+    }
+
+    function deleteTaskFromModal() {
+        const id = document.getElementById('task-id').value;
+        if (!id) {
+            closeTaskModal();
+            return;
+        }
+
+        if (!confirm('このタスクを削除しますか？（子タスクがある場合も削除されます）')) return;
+
+        const deleteIds = new Set([parseInt(id, 10)]);
+
+        let changed = true;
+        while (changed) {
+            changed = false;
+            tasks.forEach(t => {
+                if (t.parent && deleteIds.has(t.parent)) {
+                    if (!deleteIds.has(t.id)) {
+                        deleteIds.add(t.id);
+                        changed = true;
+                    }
+                }
+            });
+        }
+
+        tasks = tasks.filter(t => !deleteIds.has(t.id));
+        closeTaskModal();
+        renderTasks();
+        renderIntegratedView();
+        renderCalendar();
+        saveToLocalStorage();
+    }
+
+    function renderTasks() {
+        const tbody = document.getElementById('task-table-body');
+        if (!tbody) return;
+
+        const store = document.getElementById('store-filter').value;
+        const levelFilter = document.getElementById('level-filter').value;
+
+        const filtered = tasks.filter(t => {
+            if (store !== 'all' && t.store !== store) return false;
+            if (levelFilter !== 'all' && String(t.level) !== levelFilter) return false;
+            return true;
+        });
+
+        filtered.sort((a, b) => {
+            if (a.level !== b.level) return a.level - b.level;
+            const pa = a.parent ? a.parent : 0;
+            const pb = b.parent ? b.parent : 0;
+            if (pa !== pb) return pa - pb;
+            if (a.start && b.start) {
+                return new Date(a.start) - new Date(b.start);
+            }
+            return a.id - b.id;
+        });
+
+        const parentMap = {};
+        tasks.forEach(t => parentMap[t.id] = t.name);
+
+        const statusClassMap = {
+            'not-started': 'status-not-started',
+            'in-progress': 'status-in-progress',
+            'done': 'status-done',
+            'risk': 'status-risk'
+        };
+
+        tbody.innerHTML = filtered.map(task => {
+            const isSelected = selectedTasks.has(task.id);
+            const levelClass = `level-${task.level}`;
+            const parentName = task.parent ? parentMap[task.parent] || '' : '';
+            const startLabel = task.start || '';
+            const endLabel = task.end || '';
+            const statusClass = statusClassMap[task.status] || 'status-not-started';
+
+            const priorityText = task.priority === 'high' ? '高' : (task.priority === 'low' ? '低' : '中');
+            const priorityClass = task.priority === 'high'
+                ? 'priority-high'
+                : task.priority === 'low'
+                    ? 'priority-low'
+                    : 'priority-medium';
+
+            const initials = task.person ? task.person.charAt(0) : '?';
+
+            return `
+                <tr class="${isSelected ? 'selected' : ''}" data-task-id="${task.id}" ondblclick="openTaskModal(${task.id})" onclick="toggleTaskSelection(${task.id})">
+                    <td style="text-align:center;">${isSelected ? '✓' : ''}</td>
+                    <td><span class="level-tag ${levelClass}">L${task.level}</span></td>
+                    <td>${task.name}</td>
+                    <td>${parentName}</td>
+                    <td>${formatStoreName(task.store)}</td>
+                    <td>
+                        <div class="assignee">
+                            ${task.person ? `<span class="assignee-avatar">${initials}</span><span>${task.person}</span>` : '-'}
+                        </div>
+                    </td>
+                    <td><span class="priority-tag ${priorityClass}">${priorityText}</span></td>
+                    <td>${startLabel}</td>
+                    <td>${endLabel}</td>
+                    <td><span class="status-badge ${statusClass}">${formatStatus(task.status)}</span></td>
+                </tr>
+            `;
+        }).join('');
+
+        updateKPIs();
+    }
+
+    function toggleTaskSelection(taskId) {
+        if (selectedTasks.has(taskId)) {
+            selectedTasks.delete(taskId);
+        } else {
+            selectedTasks.add(taskId);
+        }
+        renderTasks();
+    }
+
+    function formatStoreName(store) {
+        switch (store) {
+            case 'kawasaki': return 'ラゾーナ川崎店';
+            case 'sample-aoyama': return '青山店（サンプル）';
+            case 'sample-yokohama': return '横浜店（サンプル）';
+            case 'sample-shinjuku': return '新宿店（サンプル）';
+            default: return store || '';
+        }
+    }
+
+    function formatStatus(status) {
+        switch (status) {
+            case 'not-started': return '未着手';
+            case 'in-progress': return '進行中';
+            case 'done': return '完了';
+            case 'risk': return '要注意';
+            default: return status || '';
+        }
+    }
+
+    function updateKPIs() {
+        const total = tasks.length;
+        const done = tasks.filter(t => t.status === 'done').length;
+        const risk = tasks.filter(t => t.status === 'risk').length;
+
+        const totalEl = document.getElementById('kpi-total-tasks');
+        const doneEl = document.getElementById('kpi-done-tasks');
+        const riskEl = document.getElementById('kpi-risk-tasks');
+
+        if (totalEl) totalEl.textContent = total;
+        if (doneEl) doneEl.textContent = done;
+        if (riskEl) riskEl.textContent = risk;
+    }
+
+    function computeGanttRangeFromTasks() {
+        if (!tasks || tasks.length === 0) {
+            ganttProjectStart = null;
+            ganttProjectEnd = null;
+            return;
+        }
+
+        const dates = [];
+        tasks.forEach(t => {
+            if (t.start) dates.push(new Date(t.start));
+            if (t.end) dates.push(new Date(t.end));
+        });
+
+        if (dates.length === 0) {
+            ganttProjectStart = null;
+            ganttProjectEnd = null;
+            return;
+        }
+
+        const minTime = Math.min(...dates.map(d => d.getTime()));
+        const maxTime = Math.max(...dates.map(d => d.getTime()));
+
+        ganttProjectStart = new Date(minTime);
+        ganttProjectEnd = new Date(maxTime);
+
+        ganttProjectStart.setDate(ganttProjectStart.getDate() - 3);
+        ganttProjectEnd.setDate(ganttProjectEnd.getDate() + 3);
+    }
+
+    function calculateBarPosition(start, end) {
+        if (!ganttProjectStart || !ganttProjectEnd) {
+            computeGanttRangeFromTasks();
+        }
+        if (!ganttProjectStart || !ganttProjectEnd) {
+            return { left: 0, width: 0 };
+        }
+
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        const totalDaysRaw = (ganttProjectEnd - ganttProjectStart) / MS_PER_DAY;
+        const totalDays = totalDaysRaw > 0 ? totalDaysRaw : 1;
+
+        let startOffset = (startDate - ganttProjectStart) / MS_PER_DAY;
+        let endOffset = (endDate - ganttProjectStart) / MS_PER_DAY;
+
+        startOffset = Math.max(0, Math.min(totalDays, startOffset));
+        endOffset = Math.max(0, Math.min(totalDays, endOffset));
+
+        let duration = endOffset - startOffset;
+        if (duration <= 0) duration = 1;
+
+        return {
+            left: Math.max(0, Math.min(100, (startOffset / totalDays) * 100)),
+            width: Math.max(1, Math.min(100, (duration / totalDays) * 100))
+        };
+    }
+
+    let ganttDraggingTaskId = null;
+    let ganttDragStartX = 0;
+    let ganttDragStartStartDate = null;
+    let ganttDragStartEndDate = null;
+
+    function attachGanttDragHandlers() {
+        const bars = document.querySelectorAll('.gantt-bar-mini');
+        bars.forEach(bar => {
+            bar.addEventListener('mousedown', onGanttBarMouseDown);
+        });
+    }
+
+    function onGanttBarMouseDown(e) {
+        const bar = e.currentTarget;
+        const id = bar.getAttribute('data-task-id');
+        const task = tasks.find(t => String(t.id) === String(id));
+        if (!task) return;
+
+        ganttDraggingTaskId = id;
+        ganttDragStartX = e.clientX;
+        ganttDragStartStartDate = new Date(task.start);
+        ganttDragStartEndDate = new Date(task.end);
+
+        bar.classList.add('dragging');
+
+        window.addEventListener('mousemove', onGanttBarMouseMove);
+        window.addEventListener('mouseup', onGanttBarMouseUp);
+    }
+
+    function onGanttBarMouseMove(e) {
+        if (!ganttDraggingTaskId || !ganttProjectStart || !ganttProjectEnd) return;
+
+        const task = tasks.find(t => String(t.id) === String(ganttDraggingTaskId));
+        if (!task) return;
+
+        const timeline = document.querySelector('.gantt-timeline');
+        if (!timeline) return;
+
+        const totalDaysRaw = (ganttProjectEnd - ganttProjectStart) / MS_PER_DAY;
+        const totalDays = totalDaysRaw > 0 ? totalDaysRaw : 1;
+        const pxPerDay = timeline.clientWidth / totalDays;
+
+        const deltaX = e.clientX - ganttDragStartX;
+        const deltaDays = Math.round(deltaX / pxPerDay);
+
+        const newStart = new Date(ganttDragStartStartDate.getTime());
+        const newEnd = new Date(ganttDragStartEndDate.getTime());
+        newStart.setDate(newStart.getDate() + deltaDays);
+        newEnd.setDate(newEnd.getDate() + deltaDays);
+
+        task.start = newStart.toISOString().slice(0, 10);
+        task.end = newEnd.toISOString().slice(0, 10);
+
+        renderIntegratedView();
+        renderTasks();
+        renderCalendar();
+        saveToLocalStorage();
+    }
+
+    function onGanttBarMouseUp() {
+        const bars = document.querySelectorAll('.gantt-bar-mini.dragging');
+        bars.forEach(b => b.classList.remove('dragging'));
+
+        ganttDraggingTaskId = null;
+        ganttDragStartX = 0;
+        ganttDragStartStartDate = null;
+        ganttDragStartEndDate = null;
+
+        window.removeEventListener('mousemove', onGanttBarMouseMove);
+        window.removeEventListener('mouseup', onGanttBarMouseUp);
+    }
+
+    function renderIntegratedView() {
+        const treeContainer = document.getElementById('tree-rows');
+        const ganttHeaderDays = document.getElementById('gantt-header-days');
+        const ganttBody = document.getElementById('gantt-body');
+
+        if (!treeContainer || !ganttHeaderDays || !ganttBody) return;
+
+        if (tasks.length === 0) {
+            treeContainer.innerHTML = '<div class="empty-state"><strong>タスクがまだありません。</strong><br>「タスク追加」から、ラゾーナ川崎店のオープンプロジェクトの骨格を作成してください。</div>';
+            ganttHeaderDays.innerHTML = '';
+            ganttBody.innerHTML = '';
+            return;
+        }
+
+        computeGanttRangeFromTasks();
+
+        if (!ganttProjectStart || !ganttProjectEnd) {
+            treeContainer.innerHTML = '<div class="empty-state">日付が設定されたタスクがありません。</div>';
+            ganttHeaderDays.innerHTML = '';
+            ganttBody.innerHTML = '';
+            return;
+        }
+
+        let minDate = new Date(ganttProjectStart.getTime());
+        let maxDate = new Date(ganttProjectEnd.getTime());
+
+        const store = document.getElementById('store-filter').value;
+        const levelFilter = document.getElementById('level-filter').value;
+
+        const visibleTasks = tasks.filter(t => {
+            if (store !== 'all' && t.store !== store) return false;
+            if (levelFilter !== 'all' && String(t.level) !== levelFilter) return false;
+            return true;
+        });
+
+        if (visibleTasks.length === 0) {
+            treeContainer.innerHTML = '<div class="empty-state">この条件に該当するタスクがありません。</div>';
+            ganttHeaderDays.innerHTML = '';
+            ganttBody.innerHTML = '';
+            return;
+        }
+
+        const topLevel = visibleTasks.filter(t => !t.parent);
+
+        topLevel.forEach(t => {
+            if (!expandedTasks.has(t.id)) {
+                expandedTasks.add(t.id);
+            }
+        });
+
+        let workMin = null;
+        let workMax = null;
+
+        visibleTasks.forEach(t => {
+            if (t.start) {
+                const d = new Date(t.start);
+                if (!workMin || d < workMin) workMin = d;
+            }
+            if (t.end) {
+                const d = new Date(t.end);
+                if (!workMax || d > workMax) workMax = d;
+            }
+        });
+
+        if (workMin && workMax) {
+            minDate = new Date(workMin.getTime());
+            maxDate = new Date(workMax.getTime());
+            minDate.setDate(minDate.getDate() - 2);
+            maxDate.setDate(maxDate.getDate() + 2);
+        }
+
+        ganttProjectStart = minDate;
+        ganttProjectEnd = maxDate;
+
+        const dayNames = '日月火水木金土';
+        const daysHtml = [];
+        const days = [];
+        const cursor = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+
+        while (cursor <= maxDate) {
+            const label = `${cursor.getMonth() + 1}/${cursor.getDate()}`;
+            const dow = dayNames[cursor.getDay()];
+            const weekend = cursor.getDay() === 0 || cursor.getDay() === 6;
+            daysHtml.push(`
+                <div class="gantt-day ${weekend ? 'weekend' : ''}">
+                    <span>${label}</span>
+                    <span class="dow">${dow}</span>
+                </div>
+            `);
+            days.push(new Date(cursor.getTime()));
+            cursor.setDate(cursor.getDate() + 1);
+        }
+
+        ganttHeaderDays.innerHTML = daysHtml.join('');
+
+        let treeHtml = '';
+        let ganttRowsHtml = '';
+
+        const levelColors = ['#6366f1', '#22c55e', '#f97316', '#0ea5e9', '#e11d48', '#6d28d9', '#16a34a', '#7c2d12'];
+        const statusClassMap = {
+            'not-started': 'gantt-status-not-started',
+            'in-progress': '',
+            'done': 'gantt-status-done',
+            'risk': 'gantt-status-risk'
+        };
+
+        const renderTaskTree = (task, depth = 0) => {
+            if (!visibleTasks.includes(task)) return;
+            const hasChildren = visibleTasks.some(t => t.parent == task.id);
+            const isExpanded = expandedTasks.has(task.id);
+            const barPosition = calculateBarPosition(task.start, task.end);
+
+            const levelClass = `level-${task.level}`;
+            const statusClass = statusClassMap[task.status] || '';
+            const color = levelColors[task.level - 1] || '#6b7280';
+
+            const indentPadding = depth * 10;
+            const dateLabel = task.start && task.end
+                ? `${task.start}〜${task.end}`
+                : (task.start || task.end || '-');
+
+            const initials = task.person ? task.person.charAt(0) : '?';
+
+            treeHtml += `
+                <div class="tree-row" data-task-id="${task.id}">
+                    <div class="tree-cell-main" style="padding-left:${8 + indentPadding}px;">
+                        <div class="tree-toggle ${hasChildren ? '' : 'empty'}" ${hasChildren ? `onclick="toggleExpand(${task.id})"` : ''}>
+                            ${hasChildren ? (isExpanded ? '−' : '+') : ''}
+                        </div>
+                        <div class="tree-level-indicator" style="background:${color};"></div>
+                        <div>
+                            <div class="tree-task-title">${task.name}</div>
+                            <div class="tree-assignee">
+                                ${task.person ? `<span class="assignee-avatar" style="width:16px;height:16px;font-size:9px;background:${color};">${initials}</span> ${task.person}` : ''}
+                                <span style="margin-left:4px;font-size:10px;color:#9ca3af;">L${task.level}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tree-date">${dateLabel}</div>
+                    <div class="tree-status">
+                        <span class="status-badge ${statusClass}">${formatStatus(task.status)}</span>
+                    </div>
+                </div>
+            `;
+
+            const barLeftPercent = barPosition.left;
+            const barWidthPercent = barPosition.width;
+
+            ganttRowsHtml += `
+                <div class="gantt-row" data-task-id="${task.id}">
+                    <div class="gantt-track">
+                        <div class="gantt-bar-mini ${statusClass}"
+                             data-task-id="${task.id}"
+                             title="${task.name}｜${task.person || ''}｜${task.start || ''}〜${task.end || ''}"
+                             style="left:${barLeftPercent}%; width:${barWidthPercent}%;">
+                            ${task.person ? task.person : ''} ${task.start || ''}〜${task.end || ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (isExpanded && hasChildren) {
+                visibleTasks
+                    .filter(t => t.parent == task.id)
+                    .forEach(child => renderTaskTree(child, depth + 1));
+            }
+        };
+
+        topLevel.forEach(task => renderTaskTree(task, 0));
+
+        treeContainer.innerHTML = treeHtml;
+        ganttBody.innerHTML = ganttRowsHtml;
+
+        attachGanttDragHandlers();
+    }
+
+    function toggleExpand(taskId) {
+        if (expandedTasks.has(taskId)) {
+            expandedTasks.delete(taskId);
+        } else {
+            expandedTasks.add(taskId);
+        }
+        renderIntegratedView();
     }
 
     function expandAll() {
-      tasks.forEach((t) => expanded.add(t.id));
-      renderGanttView();
+        tasks.forEach(t => expandedTasks.add(t.id));
+        renderIntegratedView();
     }
 
     function collapseAll() {
-      tasks.forEach((t) => expanded.delete(t.id));
-      renderGanttView();
+        expandedTasks.clear();
+        renderIntegratedView();
     }
 
-    /* ==== ドラッグ＆ドロップ（クリック解除でドロップ）============ */
-
-    let draggingId = null;
-    let dragStartX = 0;
-    let dragStartStartDate = null;
-    let dragStartEndDate = null;
-
-    function attachDragHandlers() {
-      const bars = document.querySelectorAll(".gantt-bar");
-      bars.forEach((bar) => {
-        bar.addEventListener("mousedown", onBarMouseDown);
-      });
+    function buildKawasakiTasks() {
+        tasks = [
+            {
+                id: 1,
+                level: 1,
+                store: 'kawasaki',
+                name: 'ラゾーナ川崎店オープンプロジェクト',
+                parent: null,
+                person: '秋山',
+                priority: 'high',
+                start: '2025-10-20',
+                end: '2026-03-31',
+                status: 'in-progress',
+                memo: 'プロジェクト全体の親タスク'
+            }
+        ];
     }
 
-    function onBarMouseDown(e) {
-      const bar = e.currentTarget;
-      const id = Number(bar.getAttribute("data-task-id"));
-      const task = tasks.find((t) => t.id === id);
-      if (!task) return;
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        if (!grid) return;
 
-      draggingId = id;
-      dragStartX = e.clientX;
-      dragStartStartDate = parseDate(task.start);
-      dragStartEndDate = parseDate(task.end);
+        const date = currentCalendarMonth;
+        const y = date.getFullYear();
+        const m = date.getMonth();
 
-      bar.classList.add("dragging");
+        document.getElementById('calendar-month-label').textContent = `${y}年${m + 1}月`;
 
-      window.addEventListener("mousemove", onBarMouseMove);
-      window.addEventListener("mouseup", onBarMouseUp);
+        const firstDay = new Date(y, m, 1);
+        const lastDay = new Date(y, m + 1, 0);
+
+        const startOffset = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+
+        grid.innerHTML = '';
+
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        dayNames.forEach(d => {
+            const header = document.createElement('div');
+            header.className = 'calendar-day-header';
+            header.textContent = d;
+            grid.appendChild(header);
+        });
+
+        for (let i = 0; i < startOffset; i++) {
+            const empty = document.createElement('div');
+            grid.appendChild(empty);
+        }
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        for (let d = 1; d <= totalDays; d++) {
+            const dayDate = new Date(y, m, d);
+            const dayCell = document.createElement('div');
+            dayCell.className = 'calendar-day';
+
+            if (dayDate.getTime() === today.getTime()) {
+                dayCell.classList.add('today');
+            }
+
+            const dateLabel = document.createElement('div');
+            dateLabel.className = 'calendar-date-label';
+            dateLabel.textContent = d;
+
+            const luckyLabel = document.createElement('div');
+            if (dayDate.getDay() === 0) {
+                luckyLabel.className = 'calendar-unlucky';
+                luckyLabel.textContent = '不成就日';
+            } else if (dayDate.getDay() === 6) {
+                luckyLabel.className = 'calendar-lucky';
+                luckyLabel.textContent = '大安';
+            }
+
+            dayCell.appendChild(dateLabel);
+            dayCell.appendChild(luckyLabel);
+
+            const dayTasks = tasks.filter(t => t.start === formatISO(dayDate));
+            dayTasks.forEach(t => {
+                const chip = document.createElement('div');
+                chip.className = 'calendar-task-chip';
+                if (t.priority === 'high') chip.classList.add('important');
+                chip.textContent = t.name;
+                dayCell.appendChild(chip);
+            });
+
+            grid.appendChild(dayCell);
+        }
     }
 
-    function onBarMouseMove(e) {
-      if (!draggingId || !ganttStart || !ganttEnd) return;
-
-      const task = tasks.find((t) => t.id === draggingId);
-      if (!task) return;
-
-      const deltaX = e.clientX - dragStartX;
-      const deltaDays = Math.round(deltaX / PX_PER_DAY);
-
-      const newStart = new Date(dragStartStartDate.getTime());
-      const newEnd = new Date(dragStartEndDate.getTime());
-      newStart.setDate(newStart.getDate() + deltaDays);
-      newEnd.setDate(newEnd.getDate() + deltaDays);
-
-      // 実データ更新
-      task.start = formatISO(newStart);
-      task.end = formatISO(newEnd);
-
-      // 途中も見た目を更新
-      renderGanttView();
+    function formatISO(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     }
 
-    function onBarMouseUp() {
-      const bars = document.querySelectorAll(".gantt-bar.dragging");
-      bars.forEach((b) => b.classList.remove("dragging"));
-
-      draggingId = null;
-      dragStartX = 0;
-      dragStartStartDate = null;
-      dragStartEndDate = null;
-
-      window.removeEventListener("mousemove", onBarMouseMove);
-      window.removeEventListener("mouseup", onBarMouseUp);
+    function changeMonth(delta) {
+        currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + delta, 1);
+        renderCalendar();
     }
 
-    /* ==== タブ切り替え ============================================= */
+    function goToThisMonth() {
+        currentCalendarMonth = new Date();
+        renderCalendar();
+    }
 
-    document.querySelectorAll(".tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const target = tab.getAttribute("data-tab");
-        document
-          .querySelectorAll(".tab")
-          .forEach((t) => t.classList.remove("active"));
-        document
-          .querySelectorAll(".tab-content")
-          .forEach((c) => (c.style.display = "none"));
+    function scrollToToday() {
+        if (!ganttProjectStart || !ganttProjectEnd) return;
 
-        tab.classList.add("active");
-        document.getElementById(target).style.display = "block";
-      });
-    });
+        const today = new Date();
+        const todayISO = formatISO(today);
+        const hasTodayTask = tasks.some(t => t.start === todayISO || t.end === todayISO);
+        if (!hasTodayTask) return;
 
-    /* ==== イベント初期化 =========================================== */
+        const totalDays = (ganttProjectEnd - ganttProjectStart) / MS_PER_DAY;
+        if (totalDays <= 0) return;
 
-    document
-      .getElementById("expand-all")
-      .addEventListener("click", expandAll);
-    document
-      .getElementById("collapse-all")
-      .addEventListener("click", collapseAll);
-    document
-      .getElementById("year-select")
-      .addEventListener("change", renderGanttView);
+        const offsetDays = (today - ganttProjectStart) / MS_PER_DAY;
+        const scrollFraction = offsetDays / totalDays;
 
-    document.getElementById("today-button").addEventListener("click", () => {
-      if (!ganttStart || !ganttEnd) return;
-      const today = new Date();
-      // 今日が範囲外なら何もしない
-      if (today < ganttStart || today > ganttEnd) return;
+        const ganttColumn = document.querySelector('.gantt-column');
+        if (!ganttColumn) return;
 
-      const daysFromStart = Math.round((today - ganttStart) / MS_PER_DAY);
-      const scrollX = daysFromStart * PX_PER_DAY - 200;
+        const maxScroll = ganttColumn.scrollWidth - ganttColumn.clientWidth;
+        const targetScrollLeft = Math.max(0, Math.min(maxScroll, maxScroll * scrollFraction - ganttColumn.clientWidth / 2));
 
-      const headerScroll = document.getElementById("gantt-scroll-header");
-      headerScroll.scrollLeft = Math.max(scrollX, 0);
-    });
+        ganttColumn.scrollLeft = targetScrollLeft;
+    }
 
-    /* ==== 初期描画 ================================================= */
+    function generateSimpleReport() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+        const done = tasks.filter(t => t.status === 'done');
+        const inProgress = tasks.filter(t => t.status === 'in-progress');
+        const risk = tasks.filter(t => t.status === 'risk');
 
-    tasks.forEach((t) => expanded.add(t.id)); // 初期状態ですべて展開
-    renderGanttView();
-  </script>
+        const reportLines = [];
+        reportLines.push(`【${dateStr} 新店オープン状況】`);
+        reportLines.push('');
+        reportLines.push(`■ 進行中タスク数：${inProgress.length}`);
+        reportLines.push(`■ 完了タスク数　：${done.length}`);
+        reportLines.push(`■ 要注意タスク数：${risk.length}`);
+        reportLines.push('');
+
+        if (inProgress.length) {
+            reportLines.push('＜進行中（主なもの）＞');
+            inProgress.slice(0, 5).forEach(t => {
+                reportLines.push(`・${t.name}（担当：${t.person || '-'} / 〜${t.end || '-'}）`);
+            });
+            reportLines.push('');
+        }
+
+        if (risk.length) {
+            reportLines.push('＜要注意タスク＞');
+            risk.slice(0, 5).forEach(t => {
+                reportLines.push(`・${t.name}（担当：${t.person || '-'} / 〜${t.end || '-'}）`);
+            });
+            reportLines.push('');
+        }
+
+        const reportArea = document.getElementById('report-text');
+        if (reportArea) {
+            reportArea.value = reportLines.join('\n');
+        }
+    }
+
+    function copyReport() {
+        const reportArea = document.getElementById('report-text');
+        if (!reportArea || !reportArea.value) {
+            alert('コピーするレポートがありません。');
+            return;
+        }
+        reportArea.select();
+        document.execCommand('copy');
+        alert('レポートをコピーしました。');
+    }
+
+    function saveToLocalStorage() {
+        try {
+            const data = {
+                tasks,
+                expandedTasks: Array.from(expandedTasks),
+                selectedTasks: Array.from(selectedTasks)
+            };
+            localStorage.setItem('istyle_store_dashboard', JSON.stringify(data));
+        } catch (e) {}
+    }
+
+    function loadFromLocalStorage() {
+        try {
+            const raw = localStorage.getItem('istyle_store_dashboard');
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (data.tasks) tasks = data.tasks;
+            if (data.expandedTasks) expandedTasks = new Set(data.expandedTasks);
+            if (data.selectedTasks) selectedTasks = new Set(data.selectedTasks);
+        } catch (e) {}
+    }
+
+    function exportTasks() {
+        if (!tasks.length) {
+            alert('エクスポートするタスクがありません。');
+            return;
+        }
+
+        const header = [
+            'ID',
+            'レベル',
+            '店舗',
+            'タスク名',
+            '親タスクID',
+            '担当',
+            '優先度',
+            '開始日',
+            '終了日',
+            'ステータス',
+            'メモ'
+        ];
+
+        const rows = tasks.map(t => [
+            t.id,
+            t.level,
+            formatStoreName(t.store),
+            t.name,
+            t.parent || '',
+            t.person || '',
+            t.priority || '',
+            t.start || '',
+            t.end || '',
+            formatStatus(t.status),
+            (t.memo || '').replace(/\r?\n/g, ' ')
+        ]);
+
+        const csvContent = [header, ...rows].map(r => r.map(field => {
+            const f = String(field).replace(/"/g, '""');
+            if (f.search(/("|,|\n)/g) >= 0) {
+                return `"${f}"`;
+            }
+            return f;
+        }).join(',')).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tasks_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function initializeSampleTasks() {
+        buildKawasakiTasks();
+
+        tasks.push(
+            {
+                id: 2,
+                level: 2,
+                store: 'kawasaki',
+                name: 'プロジェクト設計・全体計画',
+                parent: 1,
+                person: '秋山',
+                priority: 'high',
+                start: '2025-10-20',
+                end: '2025-11-15',
+                status: 'in-progress',
+                memo: '全体像を固めるフェーズ'
+            },
+            {
+                id: 3,
+                level: 2,
+                store: 'kawasaki',
+                name: 'デベロッパー・契約関連',
+                parent: 1,
+                person: '竹之内',
+                priority: 'high',
+                start: '2025-10-20',
+                end: '2025-12-15',
+                status: 'in-progress',
+                memo: 'デベロッパーとの窓口'
+            },
+            {
+                id: 4,
+                level: 2,
+                store: 'kawasaki',
+                name: '採用・人員・教育',
+                parent: 1,
+                person: '秋山 / 嶌田',
+                priority: 'high',
+                start: '2025-11-01',
+                end: '2026-02-15',
+                status: 'not-started',
+                memo: '人の確保と育成'
+            },
+            {
+                id: 5,
+                level: 2,
+                store: 'kawasaki',
+                name: 'オペレーション・マニュアル・仕組み',
+                parent: 1,
+                person: '嶌田 / 夏目',
+                priority: 'medium',
+                start: '2025-11-10',
+                end: '2026-01-31',
+                status: 'not-started',
+                memo: '現場の回し方'
+            },
+            {
+                id: 6,
+                level: 2,
+                store: 'kawasaki',
+                name: 'マーケティング・販促・ブランディング',
+                parent: 1,
+                person: '草柳',
+                priority: 'medium',
+                start: '2025-12-01',
+                end: '2026-02-28',
+                status: 'not-started',
+                memo: 'SNS〜館内販促'
+            },
+            {
+                id: 7,
+                level: 3,
+                store: 'kawasaki',
+                name: 'オープン目標日とソフトオープン日を決定する',
+                parent: 2,
+                person: '秋山',
+                priority: 'high',
+                start: '2025-10-20',
+                end: '2025-10-31',
+                status: 'in-progress',
+                memo: '引き渡し日から逆算'
+            },
+            {
+                id: 8,
+                level: 3,
+                store: 'kawasaki',
+                name: 'KGI/KPI・売上シミュレーションを作成',
+                parent: 2,
+                person: '秋山',
+                priority: 'high',
+                start: '2025-10-25',
+                end: '2025-11-10',
+                status: 'not-started',
+                memo: '1ヶ月/3ヶ月/1年の目標'
+            },
+            {
+                id: 9,
+                level: 3,
+                store: 'kawasaki',
+                name: '求人条件・人数計画の確定',
+                parent: 4,
+                person: '秋山 / 嶌田',
+                priority: 'high',
+                start: '2025-11-05',
+                end: '2025-11-20',
+                status: 'not-started',
+                memo: '必要人員数・ポジション構成'
+            },
+            {
+                id: 10,
+                level: 3,
+                store: 'kawasaki',
+                name: 'アルバイト・社員の採用面接',
+                parent: 4,
+                person: '嶌田',
+                priority: 'high',
+                start: '2025-11-20',
+                end: '2026-01-10',
+                status: 'not-started',
+                memo: '面接実施・評価シート'
+            },
+            {
+                id: 11,
+                level: 3,
+                store: 'kawasaki',
+                name: 'SNS・館内告知の企画とスケジュール作成',
+                parent: 6,
+                person: '草柳',
+                priority: 'medium',
+                start: '2025-12-10',
+                end: '2026-01-15',
+                status: 'not-started',
+                memo: 'オープン告知計画'
+            },
+            {
+                id: 12,
+                level: 3,
+                store: 'kawasaki',
+                name: 'オープン記念ノベルティ企画・発注',
+                parent: 6,
+                person: '草柳 / 岡本',
+                priority: 'medium',
+                start: '2025-12-20',
+                end: '2026-02-10',
+                status: 'not-started',
+                memo: 'ノベルティ内容・コスト'
+            }
+        );
+    }
+
+    function init() {
+        loadFromLocalStorage();
+        if (!tasks.length) {
+            initializeSampleTasks();
+        }
+
+        initializeStaff();
+        renderTasks();
+        renderIntegratedView();
+        currentCalendarMonth = new Date(2025, 9, 1);
+        renderCalendar();
+        simulateSync();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
