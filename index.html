@@ -479,8 +479,6 @@
     const MS_PER_DAY = 1000 * 60 * 60 * 24;
     const PX_PER_DAY = 32;
 
-    // ひとまずラゾーナ川崎店のタスクだけ入れています。
-    // 必要に応じてタスクを追加・編集してください。
     const tasks = [
       {
         id: 1,
@@ -630,18 +628,10 @@
       return `${y}-${m}-${d}`;
     }
 
-    // 年フィルタ＋将来の店舗フィルタを考慮して、ガントの開始・終了日を決定
     function computeGanttRange(yearFilter) {
-      const storeSelectEl = document.getElementById("store-select");
-      const storeFilter = storeSelectEl ? storeSelectEl.value : null;
-
       const dates = [];
       for (const t of tasks) {
         if (!t.start || !t.end) continue;
-
-        // 将来 store プロパティを持たせたとき用のフィルタ
-        if (storeFilter && t.store && t.store !== storeFilter) continue;
-
         const s = parseDate(t.start);
         const e = parseDate(t.end);
 
@@ -668,12 +658,6 @@
       ganttEnd.setDate(ganttEnd.getDate() + 3);
     }
 
-    function getTotalDays() {
-      if (!ganttStart || !ganttEnd) return 1;
-      const diff = (ganttEnd - ganttStart) / MS_PER_DAY;
-      return diff > 0 ? diff + 1 : 1;
-    }
-
     /* ==== ガントヘッダー生成 ====================================== */
 
     function buildHeaderDaysHtml() {
@@ -698,7 +682,13 @@
       return days.join("");
     }
 
-    /* ==== バーポジション算出（ヘッダーと完全同期） ================ */
+    function getTotalDays() {
+      if (!ganttStart || !ganttEnd) return 1;
+      const diff = (ganttEnd - ganttStart) / MS_PER_DAY;
+      return diff > 0 ? diff + 1 : 1;
+    }
+
+    /* ==== バーポジション算出（ガントとヘッダーを完全同期） ======= */
 
     function calculateBarPixelPosition(startStr, endStr) {
       if (!ganttStart || !ganttEnd) {
@@ -822,7 +812,7 @@
 
       container.innerHTML = html.join("");
 
-      // スクロール同期（行 → ヘッダー）
+      // スクロール同期
       const headerScroll = document.getElementById("gantt-scroll-header");
       const bodyScrolls = container.querySelectorAll(".gantt-scroll-body");
       bodyScrolls.forEach((sc) => {
@@ -890,7 +880,7 @@
       window.addEventListener("mouseup", onBarMouseUp);
     }
 
-    // ドラッグ中はバーだけを動かし、日付データはまだ書き換えない
+    // ドラッグ中はバーだけを横移動させ、日付データはまだ確定しない
     function onBarMouseMove(e) {
       if (!draggingId || !draggingBar) return;
 
@@ -899,7 +889,7 @@
       draggingBar.style.left = `${newLeft}px`;
     }
 
-    // マウスを離したタイミングで日付を確定 → 再描画
+    // マウスを離したタイミングで日付を計算 → データ更新 → 再描画
     function onBarMouseUp(e) {
       if (!draggingId || !draggingBar) {
         cleanupDrag();
@@ -968,7 +958,7 @@
       .getElementById("year-select")
       .addEventListener("change", renderGanttView);
 
-    // 「今日へ」ボタン：ヘッダーとガント本体のスクロールを同期
+    // 今日へ：ヘッダーとガント本体のスクロールをそろえる
     document.getElementById("today-button").addEventListener("click", () => {
       if (!ganttStart || !ganttEnd) return;
       const today = new Date();
