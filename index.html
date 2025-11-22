@@ -1543,13 +1543,11 @@
         const trackRect = track.getBoundingClientRect();
         const barRect = barEl.getBoundingClientRect();
 
-        // どのあたりをつかんだか（端ならリサイズ、中央なら移動）
         const rel = (event.clientX - barRect.left)/barRect.width;
         let mode = 'move';
         if(rel > 0.7) mode = 'resizeEnd';
         else if(rel < 0.3) mode = 'resizeStart';
 
-        // 1日あたりのpx（現在の表示幅）
         const pxPerDay = trackRect.width / GANTT_TOTAL_DAYS;
 
         ganttDrag = {
@@ -1574,7 +1572,6 @@
         if(!ganttDrag) return;
         const {barEl,trackRect,type,originalStart,originalEnd,task,startX,pxPerDay} = ganttDrag;
 
-        // マウス移動量(px) → 日数差分
         const deltaX = e.clientX - startX;
         const deltaDays = Math.round(deltaX / pxPerDay);
 
@@ -1587,16 +1584,14 @@
         }else if(type === 'resizeStart'){
             newStart.setDate(newStart.getDate() + deltaDays);
             if(newStart > newEnd) newStart = new Date(newEnd);
-        }else{ // resizeEnd
+        }else{
             newEnd.setDate(newEnd.getDate() + deltaDays);
             if(newEnd < newStart) newEnd = new Date(newStart);
         }
 
-        // 実データとして保持する値（年の範囲外もOK）
         ganttDrag.previewStart = newStart;
         ganttDrag.previewEnd   = newEnd;
 
-        // 表示用は「今年の範囲」でクリップしてバー位置を計算
         let dispStart = new Date(Math.max(GANTT_START, newStart));
         let dispEnd   = new Date(Math.min(GANTT_END,   newEnd));
         if(dispEnd < dispStart) dispEnd = new Date(dispStart);
