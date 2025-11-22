@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920">
+    <title>Store Opening Dashboard - Desktop Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #007AFF;
+            --primary-hover: #0051D5;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --purple: #5856D6;
+            --indigo: #5E5CE6;
+            --background: #F2F2F7;
+            --surface: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --border: #E5E5EA;
+            --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Header */
+        .header {
+            height: 80px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            padding: 10px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-display-compact {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            padding: 12px 24px;
+            background: rgba(88, 86, 214, 0.1);
+            border-radius: var(--radius-lg);
+        }
+
+        .date-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-value-compact {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .date-value-compact input {
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            width: 120px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Gantt Chart */
+        .gantt-wrapper {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gantt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .gantt-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .gantt-sidebar {
+            width: 250px;
+            background: var(--background);
+            border-right: 2px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .gantt-task-row {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            min-height: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .gantt-task-row:hover {
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .gantt-task-row.header {
+            background: var(--surface);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .gantt-chart-area {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background: var(--surface);
+        }
+
+        .gantt-timeline {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            border-bottom: 2px solid var(--border);
+            z-index: 20;
+            display: flex;
+            min-height: 50px;
+        }
+
+        .gantt-month {
+            min-width: 200px;
+            padding: 12px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+            font-weight: 500;
+        }
+
+        .gantt-tasks-container {
+            position: relative;
+            min-height: 400px;
+        }
+
+        .gantt-task {
+            position: absolute;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: move;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            z-index: 10;
+        }
+
+        .gantt-task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+            z-index: 30;
+        }
+
+        .gantt-task.completed {
+            background: linear-gradient(135deg, var(--success), #30D158);
+        }
+
+        .gantt-task.in-progress {
+            background: linear-gradient(135deg, var(--warning), #FF9F0A);
+        }
+
+        .gantt-task.dragging {
+            opacity: 0.7;
+            z-index: 100;
+        }
+
+        .gantt-task-handle {
+            position: absolute;
+            width: 10px;
+            height: 100%;
+            cursor: ew-resize;
+            top: 0;
+        }
+
+        .gantt-task-handle.left {
+            left: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .gantt-task-handle.right {
+            right: 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Tasks Tab */
+        .tasks-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            height: calc(100vh - 200px);
+        }
+
+        .task-form-panel {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
+        }
+
+        .task-list-panel {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
+        }
+
+        .import-export-section {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(88, 86, 214, 0.1), rgba(0, 122, 255, 0.1));
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-input-label:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Task Cards */
+        .task-card {
+            background: var(--background);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .task-card:hover {
+            transform: translateX(4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .task-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-card-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-completed {
+            background: var(--success);
+        }
+
+        .status-in-progress {
+            background: var(--warning);
+        }
+
+        .status-not-started {
+            background: var(--text-secondary);
+        }
+
+        /* Dashboard Tab */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #FF453A);
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header glass">
+        <div class="logo">
+            <span>🏪</span>
+            <span>Store Opening Dashboard</span>
+        </div>
+
+        <div class="header-center">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('gantt')" data-tab="gantt">
+                    <span>📊</span>
+                    <span>ガントチャート</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('tasks')" data-tab="tasks">
+                    <span>📝</span>
+                    <span>タスク管理</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('dashboard')" data-tab="dashboard">
+                    <span>📈</span>
+                    <span>ダッシュボード</span>
+                </button>
+            </div>
+
+            <div class="date-display-compact">
+                <div class="date-item-compact">
+                    <span>開店日:</span>
+                    <div class="date-value-compact">
+                        <input type="date" id="openingDate" onchange="updateSchedule()">
+                    </div>
+                </div>
+                <div class="date-item-compact">
+                    <span>残り:</span>
+                    <span class="date-value-compact" id="daysRemaining">-</span>
+                </div>
+                <div class="date-item-compact">
+                    <span>進捗:</span>
+                    <span class="date-value-compact" id="progressRate">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportTasks()">📥 Export</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Gantt Chart Tab -->
+        <div id="gantt-tab" class="tab-content active">
+            <div class="gantt-wrapper">
+                <div class="gantt-header">
+                    <h2>📊 プロジェクトガントチャート</h2>
+                    <div>
+                        <button class="btn btn-secondary" onclick="zoomIn()">🔍+</button>
+                        <button class="btn btn-secondary" onclick="zoomOut()">🔍-</button>
+                        <button class="btn btn-secondary" onclick="resetZoom()">🔄</button>
+                    </div>
+                </div>
+
+                <div class="gantt-container">
+                    <div class="gantt-sidebar">
+                        <div class="gantt-task-row header">
+                            <span>タスク名</span>
+                            <span>担当者</span>
+                        </div>
+                        <div id="gantt-task-list"></div>
+                    </div>
+                    <div class="gantt-chart-area">
+                        <div class="gantt-timeline" id="gantt-timeline"></div>
+                        <div class="gantt-tasks-container" id="gantt-tasks"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasks-tab" class="tab-content">
+            <div class="tasks-container">
+                <div class="task-form-panel">
+                    <h2>新規タスク追加</h2>
+                    
+                    <div class="import-export-section">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="importFile" accept=".json,.csv" onchange="importTasks(event)">
+                            <label for="importFile" class="file-input-label">
+                                <span>📤</span>
+                                <span>インポート</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-secondary" onclick="exportTasks()">
+                            <span>📥</span>
+                            <span>エクスポート</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSampleData()">
+                            <span>📋</span>
+                            <span>サンプル</span>
+                        </button>
+                    </div>
+
+                    <form id="taskForm" onsubmit="addTask(event)">
+                        <div class="form-group">
+                            <label>タスク名 *</label>
+                            <input type="text" id="taskName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>担当者 *</label>
+                            <input type="text" id="taskPerson" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>開始日 *</label>
+                                <input type="date" id="taskStart" required>
+                            </div>
+                            <div class="form-group">
+                                <label>終了日 *</label>
+                                <input type="date" id="taskEnd" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>ステータス</label>
+                                <select id="taskStatus">
+                                    <option value="未着手">未着手</option>
+                                    <option value="進行中">進行中</option>
+                                    <option value="完了">完了</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>優先度</label>
+                                <select id="taskPriority">
+                                    <option value="高">高</option>
+                                    <option value="中" selected>中</option>
+                                    <option value="低">低</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>メモ</label>
+                            <textarea id="taskMemo" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <span>➕</span>
+                            <span>タスクを追加</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="task-list-panel">
+                    <h2>タスク一覧</h2>
+                    <div id="taskList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content">
+            <h2>📈 プロジェクトダッシュボード</h2>
+            <div class="dashboard-grid">
+                <div class="metric-card">
+                    <h3>総タスク数</h3>
+                    <div style="font-size: 32px; font-weight: bold;" id="totalTasks">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>完了タスク</h3>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--success);" id="completedTasks">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>進行中</h3>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--warning);" id="inProgressTasks">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>期限超過</h3>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--danger);" id="overdueTasks">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>タスク編集</h2>
+            <form id="editForm" onsubmit="updateTask(event)">
+                <input type="hidden" id="editTaskId">
+                <div class="form-group">
+                    <label>タスク名 *</label>
+                    <input type="text" id="editTaskName" required>
+                </div>
+                <div class="form-group">
+                    <label>担当者 *</label>
+                    <input type="text" id="editTaskPerson" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>開始日 *</label>
+                        <input type="date" id="editTaskStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label>終了日 *</label>
+                        <input type="date" id="editTaskEnd" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ステータス</label>
+                        <select id="editTaskStatus">
+                            <option value="未着手">未着手</option>
+                            <option value="進行中">進行中</option>
+                            <option value="完了">完了</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>優先度</label>
+                        <select id="editTaskPriority">
+                            <option value="高">高</option>
+                            <option value="中">中</option>
+                            <option value="低">低</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>メモ</label>
+                    <textarea id="editTaskMemo" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteTask()">削除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // State Management
+        let tasks = [];
+        let draggedTask = null;
+        let resizingTask = null;
+        let resizeDirection = null;
+        let ganttStartDate = null;
+        let ganttEndDate = null;
+        let ganttScale = 1;
+        let currentEditingTask = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDates();
+            loadTasks();
+            renderAll();
+            setupDragAndDrop();
+            setupResize();
+        });
+
+        function initializeDates() {
+            const today = new Date();
+            const openingDate = new Date(today);
+            openingDate.setMonth(openingDate.getMonth() + 3);
+            document.getElementById('openingDate').value = formatDateInput(openingDate);
+            updateDaysRemaining();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tabName === 'gantt') {
+                renderGanttChart();
+            } else if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        function renderAll() {
+            renderGanttChart();
+            renderTaskList();
+            updateProgress();
+            updateDashboard();
+        }
+
+        function updateDaysRemaining() {
+            const openingDate = new Date(document.getElementById('openingDate').value);
+            const today = new Date();
+            const daysRemaining = Math.ceil((openingDate - today) / (1000 * 60 * 60 * 24));
+            
+            const el = document.getElementById('daysRemaining');
+            if (daysRemaining > 0) {
+                el.textContent = `${daysRemaining}日`;
+                el.style.color = daysRemaining < 30 ? 'var(--danger)' : 'var(--success)';
+            } else {
+                el.textContent = '期限切れ';
+                el.style.color = 'var(--danger)';
+            }
+        }
+
+        function updateSchedule() {
+            updateDaysRemaining();
+            renderGanttChart();
+            showToast('開店予定日が更新されました', 'info');
+        }
+
+        function addTask(event) {
+            event.preventDefault();
+            
+            const task = {
+                id: Date.now(),
+                name: document.getElementById('taskName').value,
+                person: document.getElementById('taskPerson').value,
+                start: document.getElementById('taskStart').value,
+                end: document.getElementById('taskEnd').value,
+                status: document.getElementById('taskStatus').value,
+                priority: document.getElementById('taskPriority').value,
+                memo: document.getElementById('taskMemo').value
+            };
+            
+            tasks.push(task);
+            saveTasks();
+            renderAll();
+            
+            document.getElementById('taskForm').reset();
+            showToast('タスクが追加されました', 'success');
+        }
+
+        function renderGanttChart() {
+            const taskList = document.getElementById('gantt-task-list');
+            const timeline = document.getElementById('gantt-timeline');
+            const tasksContainer = document.getElementById('gantt-tasks');
+            
+            taskList.innerHTML = '';
+            timeline.innerHTML = '';
+            tasksContainer.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<div style="padding: 20px; text-align: center;">タスクがありません</div>';
+                return;
+            }
+            
+            // Calculate date range
+            const dates = tasks.flatMap(task => [new Date(task.start), new Date(task.end)]);
+            ganttStartDate = new Date(Math.min(...dates));
+            ganttEndDate = new Date(Math.max(...dates));
+            
+            ganttStartDate.setDate(ganttStartDate.getDate() - 7);
+            ganttEndDate.setDate(ganttEndDate.getDate() + 7);
+            
+            // Render task list
+            tasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = 'gantt-task-row';
+                row.innerHTML = `
+                    <span>${task.name}</span>
+                    <span>${task.person}</span>
+                `;
+                row.onclick = () => openEditModal(task.id);
+                taskList.appendChild(row);
+            });
+            
+            // Render timeline
+            const months = getMonthsBetween(ganttStartDate, ganttEndDate);
+            months.forEach(month => {
+                const monthEl = document.createElement('div');
+                monthEl.className = 'gantt-month';
+                monthEl.textContent = formatMonth(month);
+                timeline.appendChild(monthEl);
+            });
+            
+            // Render tasks
+            tasks.forEach((task, index) => {
+                const taskEl = createGanttTask(task, index);
+                tasksContainer.appendChild(taskEl);
+            });
+        }
+
+        function createGanttTask(task, index) {
+            const taskEl = document.createElement('div');
+            taskEl.className = 'gantt-task';
+            taskEl.id = `gantt-task-${task.id}`;
+            taskEl.draggable = true;
+            
+            if (task.status === '完了') {
+                taskEl.classList.add('completed');
+            } else if (task.status === '進行中') {
+                taskEl.classList.add('in-progress');
+            }
+            
+            const totalDays = (ganttEndDate - ganttStartDate) / (1000 * 60 * 60 * 24);
+            const startDays = (new Date(task.start) - ganttStartDate) / (1000 * 60 * 60 * 24);
+            const duration = (new Date(task.end) - new Date(task.start)) / (1000 * 60 * 60 * 24) + 1;
+            
+            const left = (startDays / totalDays) * 100;
+            const width = (duration / totalDays) * 100;
+            
+            taskEl.style.left = `${left}%`;
+            taskEl.style.width = `${width * ganttScale}%`;
+            taskEl.style.top = `${index * 52 + 10}px`;
+            
+            taskEl.innerHTML = `
+                <div class="gantt-task-handle left"></div>
+                <span>${task.name}</span>
+                <div class="gantt-task-handle right"></div>
+            `;
+            
+            taskEl.addEventListener('dragstart', handleDragStart);
+            taskEl.addEventListener('dragend', handleDragEnd);
+            taskEl.addEventListener('dblclick', () => openEditModal(task.id));
+            
+            const leftHandle = taskEl.querySelector('.gantt-task-handle.left');
+            const rightHandle = taskEl.querySelector('.gantt-task-handle.right');
+            
+            leftHandle.addEventListener('mousedown', (e) => handleResizeStart(e, task, 'left'));
+            rightHandle.addEventListener('mousedown', (e) => handleResizeStart(e, task, 'right'));
+            
+            return taskEl;
+        }
+
+        function setupDragAndDrop() {
+            const tasksContainer = document.getElementById('gantt-tasks');
+            
+            tasksContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            
+            tasksContainer.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragStart(e) {
+            const taskId = parseInt(e.target.id.replace('gantt-task-', ''));
+            draggedTask = tasks.find(t => t.id === taskId);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            if (!draggedTask) return;
+            
+            const container = document.getElementById('gantt-tasks');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            
+            const totalDays = (ganttEndDate - ganttStartDate) / (1000 * 60 * 60 * 24);
+            const dayOffset = (x / rect.width) * totalDays;
+            
+            const duration = (new Date(draggedTask.end) - new Date(draggedTask.start)) / (1000 * 60 * 60 * 24);
+            
+            const newStart = new Date(ganttStartDate);
+            newStart.setDate(newStart.getDate() + Math.floor(dayOffset));
+            
+            const newEnd = new Date(newStart);
+            newEnd.setDate(newEnd.getDate() + duration);
+            
+            draggedTask.start = formatDateInput(newStart);
+            draggedTask.end = formatDateInput(newEnd);
+            
+            saveTasks();
+            renderAll();
+            showToast('タスクの日程が更新されました', 'success');
+            
+            draggedTask = null;
+        }
+
+        function setupResize() {
+            document.addEventListener('mousemove', handleResize);
+            document.addEventListener('mouseup', handleResizeEnd);
+        }
+
+        function handleResizeStart(e, task, direction) {
+            e.stopPropagation();
+            e.preventDefault();
+            resizingTask = task;
+            resizeDirection = direction;
+            document.body.style.cursor = 'ew-resize';
+        }
+
+        function handleResize(e) {
+            if (!resizingTask) return;
+            
+            const container = document.getElementById('gantt-tasks');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            
+            const totalDays = (ganttEndDate - ganttStartDate) / (1000 * 60 * 60 * 24);
+            const dayOffset = (x / rect.width) * totalDays;
+            
+            const newDate = new Date(ganttStartDate);
+            newDate.setDate(newDate.getDate() + Math.floor(dayOffset));
+            
+            if (resizeDirection === 'left') {
+                if (newDate < new Date(resizingTask.end)) {
+                    resizingTask.start = formatDateInput(newDate);
+                }
+            } else {
+                if (newDate > new Date(resizingTask.start)) {
+                    resizingTask.end = formatDateInput(newDate);
+                }
+            }
+            
+            renderGanttChart();
+        }
+
+        function handleResizeEnd() {
+            if (!resizingTask) return;
+            
+            saveTasks();
+            renderAll();
+            showToast('タスクの期間が更新されました', 'success');
+            
+            resizingTask = null;
+            resizeDirection = null;
+            document.body.style.cursor = 'default';
+        }
+
+        function renderTaskList() {
+            const taskList = document.getElementById('taskList');
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<p style="text-align: center; padding: 40px;">タスクがありません</p>';
+                return;
+            }
+            
+            taskList.innerHTML = tasks.map(task => `
+                <div class="task-card" onclick="openEditModal(${task.id})">
+                    <div class="task-card-header">
+                        <div>${task.name}</div>
+                        <span class="task-card-status status-${getStatusClass(task.status)}">${task.status}</span>
+                    </div>
+                    <div>
+                        <span>👤 ${task.person}</span> | 
+                        <span>📅 ${formatDate(new Date(task.start))} - ${formatDate(new Date(task.end))}</span> | 
+                        <span>⚡ ${task.priority}</span>
+                    </div>
+                    ${task.memo ? `<div style="margin-top: 12px;">📝 ${task.memo}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateProgress() {
+            if (tasks.length === 0) {
+                document.getElementById('progressRate').textContent = '0%';
+                return;
+            }
+            
+            const completedTasks = tasks.filter(t => t.status === '完了').length;
+            const progressRate = Math.round((completedTasks / tasks.length) * 100);
+            
+            const el = document.getElementById('progressRate');
+            el.textContent = `${progressRate}%`;
+            el.style.color = progressRate === 100 ? 'var(--success)' : 
+                           progressRate > 50 ? 'var(--warning)' : 'var(--primary)';
+        }
+
+        function updateDashboard() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => t.status === '完了').length;
+            const inProgressTasks = tasks.filter(t => t.status === '進行中').length;
+            const today = new Date();
+            const overdueTasks = tasks.filter(t => 
+                t.status !== '完了' && new Date(t.end) < today
+            ).length;
+            
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('inProgressTasks').textContent = inProgressTasks;
+            document.getElementById('overdueTasks').textContent = overdueTasks;
+        }
+
+        function openEditModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            currentEditingTask = task;
+            
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskName').value = task.name;
+            document.getElementById('editTaskPerson').value = task.person;
+            document.getElementById('editTaskStart').value = task.start;
+            document.getElementById('editTaskEnd').value = task.end;
+            document.getElementById('editTaskStatus').value = task.status;
+            document.getElementById('editTaskPriority').value = task.priority;
+            document.getElementById('editTaskMemo').value = task.memo || '';
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditingTask = null;
+        }
+
+        function updateTask(event) {
+            event.preventDefault();
+            
+            const taskId = parseInt(document.getElementById('editTaskId').value);
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            
+            if (taskIndex === -1) return;
+            
+            tasks[taskIndex] = {
+                id: taskId,
+                name: document.getElementById('editTaskName').value,
+                person: document.getElementById('editTaskPerson').value,
+                start: document.getElementById('editTaskStart').value,
+                end: document.getElementById('editTaskEnd').value,
+                status: document.getElementById('editTaskStatus').value,
+                priority: document.getElementById('editTaskPriority').value,
+                memo: document.getElementById('editTaskMemo').value
+            };
+            
+            saveTasks();
+            renderAll();
+            closeEditModal();
+            showToast('タスクが更新されました', 'success');
+        }
+
+        function deleteTask() {
+            if (!currentEditingTask) return;
+            
+            if (confirm('このタスクを削除してもよろしいですか？')) {
+                tasks = tasks.filter(t => t.id !== currentEditingTask.id);
+                saveTasks();
+                renderAll();
+                closeEditModal();
+                showToast('タスクが削除されました', 'info');
+            }
+        }
+
+        function importTasks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let importedTasks;
+                    
+                    if (file.name.endsWith('.json')) {
+                        importedTasks = JSON.parse(content);
+                    } else if (file.name.endsWith('.csv')) {
+                        importedTasks = parseCSV(content);
+                    }
+                    
+                    if (Array.isArray(importedTasks)) {
+                        tasks = [...tasks, ...importedTasks];
+                        saveTasks();
+                        renderAll();
+                        showToast(`${importedTasks.length}件のタスクをインポートしました`, 'success');
+                    }
+                } catch (error) {
+                    showToast('ファイルの読み込みに失敗しました', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const tasks = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = lines[i].split(',').map(v => v.trim());
+                const task = {
+                    id: Date.now() + i,
+                    name: values[0] || 'タスク',
+                    person: values[1] || '担当者',
+                    start: values[2] || formatDateInput(new Date()),
+                    end: values[3] || formatDateInput(new Date()),
+                    status: values[4] || '未着手',
+                    priority: values[5] || '中',
+                    memo: values[6] || ''
+                };
+                tasks.push(task);
+            }
+            
+            return tasks;
+        }
+
+        function exportTasks() {
+            const dataStr = JSON.stringify(tasks, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `tasks_${formatDateInput(new Date())}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('タスクをエクスポートしました', 'success');
+        }
+
+        function zoomIn() {
+            ganttScale = Math.min(ganttScale + 0.2, 3);
+            renderGanttChart();
+        }
+
+        function zoomOut() {
+            ganttScale = Math.max(ganttScale - 0.2, 0.5);
+            renderGanttChart();
+        }
+
+        function resetZoom() {
+            ganttScale = 1;
+            renderGanttChart();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('storeTasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('storeTasks');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+            } else {
+                loadSampleData();
+            }
+        }
+
+        function loadSampleData() {
+            const today = new Date();
+            
+            tasks = [
+                {
+                    id: 1,
+                    name: '物件契約・内装設計',
+                    person: '山田太郎',
+                    start: formatDateInput(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)),
+                    end: formatDateInput(new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000)),
+                    status: '進行中',
+                    priority: '高',
+                    memo: '設計図面の最終確認待ち'
+                },
+                {
+                    id: 2,
+                    name: '内装工事',
+                    person: '佐藤花子',
+                    start: formatDateInput(new Date(today.getTime() + 22 * 24 * 60 * 60 * 1000)),
+                    end: formatDateInput(new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000)),
+                    status: '未着手',
+                    priority: '高',
+                    memo: '業者選定中'
+                },
+                {
+                    id: 3,
+                    name: '什器・備品調達',
+                    person: '鈴木一郎',
+                    start: formatDateInput(new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)),
+                    end: formatDateInput(new Date(today.getTime() + 50 * 24 * 60 * 60 * 1000)),
+                    status: '未着手',
+                    priority: '中',
+                    memo: 'カタログ収集中'
+                },
+                {
+                    id: 4,
+                    name: 'スタッフ採用・研修',
+                    person: '田中美咲',
+                    start: formatDateInput(new Date(today.getTime() + 40 * 24 * 60 * 60 * 1000)),
+                    end: formatDateInput(new Date(today.getTime() + 70 * 24 * 60 * 60 * 1000)),
+                    status: '未着手',
+                    priority: '高',
+                    memo: '求人広告準備中'
+                },
+                {
+                    id: 5,
+                    name: '開店準備・プレオープン',
+                    person: '全員',
+                    start: formatDateInput(new Date(today.getTime() + 71 * 24 * 60 * 60 * 1000)),
+                    end: formatDateInput(new Date(today.getTime() + 85 * 24 * 60 * 60 * 1000)),
+                    status: '未着手',
+                    priority: '高',
+                    memo: '最終チェックリスト作成予定'
+                }
+            ];
+            
+            saveTasks();
+            renderAll();
+            showToast('サンプルデータを読み込みました', 'success');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toast.className = `toast ${type} show`;
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.textContent = '✅';
+            } else if (type === 'error') {
+                toastIcon.textContent = '❌';
+            } else {
+                toastIcon.textContent = 'ℹ️';
+            }
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('ja-JP', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+        }
+
+        function formatDateInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatMonth(date) {
+            return date.toLocaleDateString('ja-JP', { 
+                year: 'numeric', 
+                month: 'long' 
+            });
+        }
+
+        function getMonthsBetween(start, end) {
+            const months = [];
+            const current = new Date(start.getFullYear(), start.getMonth(), 1);
+            const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+            
+            while (current <= endMonth) {
+                months.push(new Date(current));
+                current.setMonth(current.getMonth() + 1);
+            }
+            
+            return months;
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case '完了': return 'completed';
+                case '進行中': return 'in-progress';
+                default: return 'not-started';
+            }
+        }
+    </script>
+</body>
+</html>
