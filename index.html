@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>I-STYLE 店舗プロジェクト ダッシュボード v8.1（日別ガント・今日ハイライト）</title>
+    <title>I-STYLE 店舗プロジェクト ダッシュボード v9.1（v8＋階層ガント統合版）</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root{
@@ -350,15 +350,32 @@
             background:var(--accent);
         }
         .gantt-bar:active{cursor:grabbing;}
+        .gantt-row-highlight{
+            outline:2px solid var(--accent);
+            outline-offset:-2px;
+            background:var(--accent-soft);
+        }
 
-        /* 今日を縦線で表示 */
-        .gantt-today-line{
-            position:absolute;
-            top:26px;
-            bottom:0;
-            width:2px;
-            background:rgba(255,59,48,0.7);
-            pointer-events:none;
+        /* 階層ガント：ヘッダ日付セル */
+        .gantt-header-days{
+            display:flex;
+        }
+        .gantt-header-day{
+            flex:0 0 32px;
+            text-align:center;
+            border-right:1px solid #e5e5ea;
+            padding:2px 0;
+            box-sizing:border-box;
+            font-size:9px;
+            color:var(--text-sub);
+        }
+        .gantt-header-day.weekend{
+            background:#faf5f5;
+        }
+        .gantt-header-day.today{
+            background:#fff4d0;
+            font-weight:600;
+            color:#8e5b00;
         }
 
         .metrics{
@@ -514,16 +531,9 @@
         }
         .fab:hover{background:var(--accent-dark);}
 
-        /* スマホ向け（なるべく見やすく） */
         @media (max-width:900px){
             .two-column{grid-template-columns:1fr;}
-            .tree-row{grid-template-columns:1fr;}
             .header{flex-direction:column;align-items:flex-start;}
-            .container{border-radius:0;box-shadow:none;}
-        }
-        @media (max-width:600px){
-            .tree-cell{font-size:11px;}
-            .gantt-bar{font-size:9px;padding:0 4px;}
         }
 
         @media print{
@@ -541,7 +551,7 @@
 <div class="container">
     <header class="header">
         <div class="header-left">
-            <h1>I-STYLE 店舗プロジェクト ダッシュボード v8.1</h1>
+            <h1>I-STYLE 店舗プロジェクト ダッシュボード v9.1</h1>
         </div>
         <div class="header-right">
             <select id="project-select" class="project-select" onchange="changeProject(this.value)"></select>
@@ -568,16 +578,16 @@
         <button class="tab" onclick="switchTab(event,'staff')">👥 スタッフ</button>
     </div>
 
-    <!-- ガント専用ビュー -->
+    <!-- ガント（階層＋日別バー） -->
     <section id="integrated" class="tab-content active">
         <div class="card">
             <div class="card-header">
                 <div>
                     <div class="card-title">ガントチャート（親子構造＋期間＋担当）</div>
-                    <div class="card-sub">ガント期間を日別バーで表示し、タスク・期間・担当を一画面で俯瞰</div>
+                    <div class="card-sub">表示月の1日〜末日を日別バーで表示し、タスク・期間・担当を一画面で俯瞰</div>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                    <select id="gantt-year-select" onchange="changeGanttYear(this.value)"
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                    <select id="gantt-year-select" onchange="onChangeGanttYear(this.value)"
                             style="padding:4px 8px;border-radius:999px;border:1px solid var(--border);font-size:11px;background:#fff;">
                         <option value="2025">2025年</option>
                         <option value="2026">2026年</option>
@@ -586,6 +596,22 @@
                         <option value="2029">2029年</option>
                         <option value="2030">2030年</option>
                     </select>
+                    <select id="gantt-month-select" onchange="onChangeGanttMonth(this.value)"
+                            style="padding:4px 8px;border-radius:999px;border:1px solid var(--border);font-size:11px;background:#fff;">
+                        <option value="0">1月</option>
+                        <option value="1">2月</option>
+                        <option value="2">3月</option>
+                        <option value="3">4月</option>
+                        <option value="4">5月</option>
+                        <option value="5">6月</option>
+                        <option value="6">7月</option>
+                        <option value="7">8月</option>
+                        <option value="8">9月</option>
+                        <option value="9">10月</option>
+                        <option value="10">11月</option>
+                        <option value="11">12月</option>
+                    </select>
+                    <button class="btn btn-ghost" onclick="goToGanttToday()">今日</button>
                     <button class="btn btn-ghost" onclick="expandAll()">すべて展開</button>
                     <button class="btn btn-ghost" onclick="collapseAll()">すべて閉じる</button>
                     <button class="btn btn-secondary" onclick="printGantt()">印刷</button>
@@ -830,22 +856,45 @@
 <button id="fab" class="fab" onclick="openTaskModal()">＋</button>
 
 <script>
-    // ===== ガント期間（年切り替え対応） =====
+    // ===== ガント期間（年＋月） =====
     let GANTT_START;
     let GANTT_END;
     const MS_DAY = 1000*60*60*24;
     let GANTT_TOTAL_DAYS;
     const WEEKDAYS = ['日','月','火','水','木','金','土'];
+    const GANTT_DAY_PX = 32; // 1日あたりの幅（px）
 
-    function setGanttYear(year){
-        GANTT_START = new Date(year+'-01-01');
-        GANTT_END   = new Date(year+'-12-31');
+    let ganttYear = 2025;
+    let ganttMonth = 0; // 0=1月〜11=12月
+
+    function setGanttRange(year, monthIndex){
+        ganttYear = year;
+        ganttMonth = monthIndex;
+        GANTT_START = new Date(year, monthIndex, 1);
+        GANTT_END   = new Date(year, monthIndex + 1, 0);
         GANTT_TOTAL_DAYS = Math.round((GANTT_END - GANTT_START)/MS_DAY) + 1;
     }
-    function changeGanttYear(year){
-        const y = parseInt(year,10);
+    function onChangeGanttYear(value){
+        const y = parseInt(value,10);
         if(isNaN(y)) return;
-        setGanttYear(y);
+        setGanttRange(y, ganttMonth);
+        renderIntegrated();
+    }
+    function onChangeGanttMonth(value){
+        const m = parseInt(value,10);
+        if(isNaN(m)) return;
+        setGanttRange(ganttYear, m);
+        renderIntegrated();
+    }
+    function goToGanttToday(){
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        setGanttRange(y, m);
+        const ys = document.getElementById('gantt-year-select');
+        if(ys) ys.value = String(y);
+        const ms = document.getElementById('gantt-month-select');
+        if(ms) ms.value = String(m);
         renderIntegrated();
     }
 
@@ -1417,9 +1466,34 @@
         </div>`;
     }
 
-    // ===== ガントチャート（日別ヘッダー＋ドラッグ＆リサイズ＋今日表示） =====
+    // ===== ガントチャート（日別ヘッダー＋ドラッグ＆リサイズ） =====
     function printGantt(){
         window.print();
+    }
+
+    function barPos(task){
+        if(!GANTT_START || !GANTT_END) return {visible:false,left:0,width:0};
+        if(!task.start || !task.end) return {visible:false,left:0,width:0};
+
+        const s0 = new Date(task.start);
+        const e0 = new Date(task.end);
+        if(isNaN(s0) || isNaN(e0)) return {visible:false,left:0,width:0};
+
+        // 表示月と全く重ならない場合
+        if(e0 < GANTT_START || s0 > GANTT_END){
+            return {visible:false,left:0,width:0};
+        }
+
+        const s = new Date(Math.max(GANTT_START, s0));
+        const e = new Date(Math.min(GANTT_END, e0));
+        if(e < s) e.setTime(s.getTime());
+
+        const startOffset = Math.round((s - GANTT_START)/MS_DAY);
+        const duration    = Math.max(1, Math.round((e - s)/MS_DAY) + 1);
+        const left        = startOffset * GANTT_DAY_PX;
+        const width       = duration    * GANTT_DAY_PX;
+
+        return {visible:true,left,width};
     }
 
     function renderIntegrated(){
@@ -1429,68 +1503,52 @@
             ganttEl.innerHTML = '<p style="font-size:12px;color:var(--text-sub);">タスクがありません。</p>';
             return;
         }
+        if(!GANTT_START || !GANTT_END){
+            const now = new Date();
+            setGanttRange(now.getFullYear(), now.getMonth());
+        }
 
         const roots = projectTasks
             .filter(t=>!t.parentId)
             .sort((a,b)=>(a.order ?? 0)-(b.order ?? 0));
 
+        const totalWidth = 260 + GANTT_TOTAL_DAYS * GANTT_DAY_PX;
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        let todayLineHtml = '';
-        if(today >= GANTT_START && today <= GANTT_END){
-            const offset = Math.round((today - GANTT_START)/MS_DAY);
-            const left = (offset / GANTT_TOTAL_DAYS)*100;
-            todayLineHtml = `<div class="gantt-today-line" style="left:${left}%;"></div>`;
-        }
-
         let html = `
         <div style="border:1px solid var(--border);border-radius:12px;overflow:auto;background:#fff;">
-          <div style="min-width:900px;position:relative;">
-            ${todayLineHtml}
+          <div style="min-width:${totalWidth}px;">
             <!-- ヘッダー行：左に「タスク/担当」、右に日別カレンダー -->
             <div style="display:grid;grid-template-columns:260px 1fr;border-bottom:1px solid var(--border);background:#f9f9fb;">
               <div style="padding:4px 4px 4px 8px;font-size:11px;color:var(--text-sub);">
                 タスク / 担当
               </div>
-              <div style="display:flex;width:100%;font-size:9px;color:var(--text-sub);border-left:1px solid var(--border);">
-    `;
+              <div style="border-left:1px solid var(--border);">
+                <div class="gantt-header-days">
+        `;
 
-        const dayWidth = 100 / GANTT_TOTAL_DAYS;
         for(let i=0; i<GANTT_TOTAL_DAYS; i++){
             const d = new Date(GANTT_START);
             d.setDate(d.getDate()+i);
             const label = `${d.getMonth()+1}/${d.getDate()}`;
             const wd = WEEKDAYS[d.getDay()];
-            const isToday = d.toDateString() === today.toDateString();
-            const bg = isToday ? 'background:#fff6bf;' : '';
+            const isWeekend = d.getDay()===0 || d.getDay()===6;
+            const isToday = d.getTime() === today.getTime();
+            const classes = ['gantt-header-day'];
+            if(isWeekend) classes.push('weekend');
+            if(isToday) classes.push('today');
             html += `
-          <div style="flex:0 0 ${dayWidth}%;padding:2px 0;border-right:1px solid #e5e5ea;text-align:center;box-sizing:border-box;${bg}">
-            ${label}<br><span style="font-size:8px;">${wd}</span>
-          </div>`;
+              <div class="${classes.join(' ')}">
+                ${label}<br><span style="font-size:8px;">${wd}</span>
+              </div>`;
         }
 
         html += `
+                </div>
               </div>
             </div>
-    `;
-
-        function barPos(t){
-            const s0 = t.start ? new Date(t.start) : GANTT_START;
-            const e0 = t.end   ? new Date(t.end)   : s0;
-
-            let s = new Date(Math.max(GANTT_START, s0));
-            let e = new Date(Math.min(GANTT_END,   e0));
-            if(e < s) e = new Date(s);
-
-            const startOffset = Math.round((s - GANTT_START)/MS_DAY);
-            const duration    = Math.max(1, Math.round((e - s)/MS_DAY)+1);
-
-            const left  = Math.min(100, (startOffset / GANTT_TOTAL_DAYS) * 100);
-            const width = Math.min(100, (duration    / GANTT_TOTAL_DAYS) * 100);
-
-            return {left, width};
-        }
+        `;
 
         function renderNode(task, depth){
             const children = getChildren(task.id);
@@ -1514,11 +1572,12 @@
               </div>
               <div class="gantt-cell">
                 <div class="gantt-track"></div>
-                <div class="gantt-bar"
-                     style="left:${pos.left}%;width:${pos.width}%;"
+                ${pos.visible ? `
+                <div class="gantt-bar ${formatStatusClass(task.status)}"
+                     style="left:${pos.left}px;width:${pos.width}px;"
                      onmousedown="startBarDrag(event,${task.id})">
                     ${barLabel}
-                </div>
+                </div>` : ''}
               </div>
             </div>`;
 
@@ -1537,7 +1596,7 @@
         html += `
           </div>
         </div>
-    `;
+        `;
 
         ganttEl.innerHTML = html;
     }
@@ -1555,7 +1614,7 @@
         renderIntegrated();
     }
 
-    // ガントバーのドラッグ＆リサイズ（端をつかむと期間変更）
+    // ガントバーのドラッグ＆リサイズ
     function startBarDrag(event,id){
         if(!isFullEdit()) return;
         event.preventDefault();
@@ -1612,20 +1671,21 @@
             if(newEnd < newStart) newEnd = new Date(newStart);
         }
 
-        // 年範囲内にクリップ
+        // 表示月の範囲内にクリップ
         if(newStart < GANTT_START) newStart = new Date(GANTT_START);
         if(newEnd > GANTT_END) newEnd = new Date(GANTT_END);
 
         ganttDrag.previewStart = newStart;
         ganttDrag.previewEnd = newEnd;
 
+        const dayWidth = trackRect.width / GANTT_TOTAL_DAYS;
         const startOffset = Math.round((newStart - GANTT_START)/MS_DAY);
         const durationDays = Math.max(1, Math.round((newEnd - newStart)/MS_DAY)+1);
-        const left = Math.min(100,(startOffset/GANTT_TOTAL_DAYS)*100);
-        const width = Math.min(100,(durationDays/GANTT_TOTAL_DAYS)*100);
+        const leftPx = startOffset * dayWidth;
+        const widthPx = durationDays * dayWidth;
 
-        barEl.style.left = left+'%';
-        barEl.style.width = width+'%';
+        barEl.style.left = leftPx+'px';
+        barEl.style.width = widthPx+'px';
         const label = shortDateLabelRange(newStart,newEnd) + (task && task.person ? `｜${task.person}` : '');
         barEl.textContent = label;
     }
@@ -2032,7 +2092,7 @@
         extractTodayTasks();
     }
 
-    // ===== サンプルデータ =====
+    // ===== サンプルデータ（ラゾーナ川崎：2025/10/20〜2026/3/31） =====
     function loadSample(){
         if(tasks.length) return;
         const base = [
@@ -2076,9 +2136,17 @@
     renderProjectSelect();
     applyProjectColor();
     loadSample();
-    setGanttYear(2025);
+
+    // ガント初期表示：今日の年＆月
+    const now = new Date();
+    const initYear = now.getFullYear();
+    const initMonth = now.getMonth();
+    setGanttRange(initYear, initMonth);
     const ys = document.getElementById('gantt-year-select');
-    if(ys) ys.value = '2025';
+    if(ys) ys.value = String(initYear);
+    const ms = document.getElementById('gantt-month-select');
+    if(ms) ms.value = String(initMonth);
+
     updatePermissionUI();
     renderAllViews();
     renderStaff();
