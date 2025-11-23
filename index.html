@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(7).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(8).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1228,8 +1228,9 @@
                                         <option value="完了">完了</option>
                                     </select>
                                 </div>
-                                <div class="form-group" style="display: flex; align-items: flex-end;">
-                                    <button type="submit" class="btn btn-primary" style="width: 100%;">➕ タスクを追加</button>
+                                <div class="form-group" style="display: flex; align-items: flex-end; gap: 8px; grid-column: 1 / -1;">
+                                    <button type="submit" class="btn btn-primary" style="flex: 1;">➕ タスクを追加</button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()" id="cancelEditBtn" style="display: none;">キャンセル</button>
                                 </div>
                             </form>
                         </div>
@@ -2510,8 +2511,7 @@
             }
             
             const store = getCurrentStore();
-            const task = {
-                id: Date.now(),
+            const taskData = {
                 name: document.getElementById('taskName').value,
                 assignee: document.getElementById('taskAssignee').value,
                 startDate: document.getElementById('taskStart').value,
@@ -2520,12 +2520,50 @@
                 status: document.getElementById('taskStatus').value
             };
             
-            store.tasks.push(task);
+            // 編集モードかチェック
+            if (window.editingTaskId) {
+                // 既存タスクを更新
+                const taskIndex = store.tasks.findIndex(t => t.id === window.editingTaskId);
+                if (taskIndex !== -1) {
+                    store.tasks[taskIndex] = {
+                        ...store.tasks[taskIndex],
+                        ...taskData
+                    };
+                    alert('✅ タスクを更新しました！');
+                }
+                
+                // 編集モードをリセット
+                window.editingTaskId = null;
+                
+                // フォームのスタイルをリセット
+                const form = event.target;
+                form.style.background = '';
+                form.style.border = '';
+                form.style.padding = '';
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.textContent = '➕ タスクを追加';
+                    submitBtn.style.background = '';
+                }
+                
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if (cancelBtn) {
+                    cancelBtn.style.display = 'none';
+                }
+            } else {
+                // 新規タスクを追加
+                const task = {
+                    id: Date.now(),
+                    ...taskData
+                };
+                store.tasks.push(task);
+                alert('✅ タスクを追加しました！');
+            }
+            
             saveData();
             renderAll();
-            
             event.target.reset();
-            alert('タスクを追加しました！');
         }
 
         // タスク削除（権限チェック）
@@ -2554,6 +2592,10 @@
             const task = store.tasks.find(t => t.id === id);
             if (!task) return;
             
+            // 編集モードフラグを設定
+            window.editingTaskId = id;
+            
+            // フォームにデータを入力
             document.getElementById('taskName').value = task.name;
             document.getElementById('taskAssignee').value = task.assignee;
             document.getElementById('taskStart').value = task.startDate;
@@ -2561,9 +2603,65 @@
             document.getElementById('taskPhase').value = task.phase;
             document.getElementById('taskStatus').value = task.status;
             
-            deleteTask(id);
-            switchTab('tasks');
-            document.querySelector('.nav-item[onclick*="tasks"]').click();
+            // タスクタブに切り替え
+            const taskTab = document.querySelector('.nav-item[onclick*="tasks"]');
+            if (taskTab) {
+                taskTab.click();
+            }
+            
+            // フォームをハイライト
+            const form = document.querySelector('#taskFormContainer form');
+            if (form) {
+                form.style.background = 'rgba(0, 122, 255, 0.05)';
+                form.style.border = '2px solid var(--primary)';
+                form.style.padding = '20px';
+                form.style.borderRadius = '12px';
+                
+                // 送信ボタンのテキストを変更
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.textContent = '✏️ タスクを更新';
+                    submitBtn.style.background = 'var(--warning)';
+                }
+                
+                // キャンセルボタンを表示
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if (cancelBtn) {
+                    cancelBtn.style.display = 'block';
+                }
+            }
+            
+            // フォームまでスクロール
+            setTimeout(() => {
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            
+            alert('📝 タスクを編集モードで読み込みました。\n内容を修正して「タスクを更新」ボタンを押してください。');
+        }
+
+        // 編集キャンセル
+        function cancelEdit() {
+            window.editingTaskId = null;
+            
+            // フォームをリセット
+            const form = document.querySelector('#taskFormContainer form');
+            if (form) {
+                form.reset();
+                form.style.background = '';
+                form.style.border = '';
+                form.style.padding = '';
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.textContent = '➕ タスクを追加';
+                    submitBtn.style.background = '';
+                }
+                
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if (cancelBtn) {
+                    cancelBtn.style.display = 'none';
+                }
+            }
         }
 
         // ステータス変更（編集者も可能）
