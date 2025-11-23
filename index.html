@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(6).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(7).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2322,104 +2322,33 @@
             console.log('File size:', file.size, 'bytes');
             console.log('File type:', file.type);
             
+            // まずUTF-8で読み込みを試みる
             const reader = new FileReader();
             
             reader.onload = function(e) {
                 try {
                     let text = e.target.result;
-                    console.log('Raw file content length:', text.length);
-                    console.log('First 200 chars:', text.substring(0, 200));
+                    console.log('File read with UTF-8');
                     
-                    // BOMを除去
-                    if (text.charCodeAt(0) === 0xFEFF) {
-                        text = text.substring(1);
-                        console.log('BOM removed');
+                    // 文字化けチェック（文字化けしている場合、特定の文字パターンが出現する）
+                    const hasGarbage = /[\uFFFD\u0000-\u001F\u007F-\u009F]/.test(text) && !/[\r\n\t]/.test(text.replace(/[\uFFFD\u0000-\u001F\u007F-\u009F]/g, ''));
+                    
+                    if (hasGarbage) {
+                        console.log('Possible encoding issue detected, trying Shift_JIS');
+                        // Shift_JISで再読み込み
+                        const reader2 = new FileReader();
+                        reader2.onload = function(e2) {
+                            processCSVText(e2.target.result);
+                        };
+                        reader2.onerror = function() {
+                            console.error('Failed to read with Shift_JIS, using UTF-8 result anyway');
+                            processCSVText(text);
+                        };
+                        reader2.readAsText(file, 'Shift_JIS');
+                        return;
                     }
                     
-                    // 改行で分割
-                    const lines = text.split(/\r\n|\r|\n/);
-                    console.log('Total lines:', lines.length);
-                    console.log('Lines:', lines);
-                    
-                    const newTasks = [];
-                    
-                    // 1行目はヘッダーなのでスキップ、2行目から処理
-                    for (let i = 1; i < lines.length; i++) {
-                        let line = lines[i].trim();
-                        
-                        if (!line || line.length === 0) {
-                            console.log(`Line ${i}: Empty, skipping`);
-                            continue;
-                        }
-                        
-                        console.log(`\nProcessing line ${i}:`, line);
-                        
-                        // シンプルなCSVパース
-                        const values = [];
-                        let currentValue = '';
-                        let insideQuotes = false;
-                        
-                        for (let j = 0; j < line.length; j++) {
-                            const char = line[j];
-                            const nextChar = line[j + 1];
-                            
-                            if (char === '"') {
-                                if (insideQuotes && nextChar === '"') {
-                                    // エスケープされたダブルクォート
-                                    currentValue += '"';
-                                    j++; // 次の文字をスキップ
-                                } else {
-                                    // クォートの開始または終了
-                                    insideQuotes = !insideQuotes;
-                                }
-                            } else if (char === ',' && !insideQuotes) {
-                                // フィールドの区切り
-                                values.push(currentValue);
-                                currentValue = '';
-                            } else {
-                                currentValue += char;
-                            }
-                        }
-                        
-                        // 最後のフィールドを追加
-                        values.push(currentValue);
-                        
-                        console.log(`Parsed values (${values.length}):`, values);
-                        
-                        // 6つのフィールドが必要
-                        if (values.length >= 6) {
-                            const task = {
-                                id: Date.now() + i + Math.random() * 1000,
-                                name: values[0].trim(),
-                                assignee: values[1].trim(),
-                                startDate: values[2].trim(),
-                                endDate: values[3].trim(),
-                                phase: values[4].trim(),
-                                status: values[5].trim()
-                            };
-                            
-                            console.log('Created task:', task);
-                            newTasks.push(task);
-                        } else {
-                            console.log(`Line ${i}: Not enough fields (need 6, got ${values.length}), skipping`);
-                        }
-                    }
-                    
-                    console.log('\n=== Import Summary ===');
-                    console.log('Successfully parsed tasks:', newTasks.length);
-                    console.log('Tasks:', newTasks);
-                    
-                    if (newTasks.length > 0) {
-                        if (confirm(`${newTasks.length}件のタスクをインポートしますか？\n既存のデータに追加されます。`)) {
-                            const store = getCurrentStore();
-                            store.tasks = store.tasks.concat(newTasks);
-                            saveData();
-                            renderAll();
-                            alert(`✅ ${newTasks.length}件のタスクをインポートしました！`);
-                        }
-                    } else {
-                        alert('❌ インポートできるタスクが見つかりませんでした。\n\nCSVファイルの形式を確認してください：\n・1行目: ヘッダー行（タスク名,担当者,開始日,終了日,フェーズ,ステータス）\n・2行目以降: データ行\n\nコンソール（F12キー）でデバッグ情報を確認できます。');
-                    }
+                    processCSVText(text);
                     
                 } catch (error) {
                     console.error('=== CSV Import Error ===');
@@ -2432,14 +2361,129 @@
             reader.onerror = function(error) {
                 console.error('=== FileReader Error ===');
                 console.error('Error:', error);
-                alert('❌ ファイルの読み込みに失敗しました。');
+                
+                // UTF-8で失敗した場合、Shift_JISで試す
+                console.log('Trying Shift_JIS encoding...');
+                const reader2 = new FileReader();
+                reader2.onload = function(e) {
+                    processCSVText(e.target.result);
+                };
+                reader2.onerror = function() {
+                    alert('❌ ファイルの読み込みに失敗しました。');
+                };
+                reader2.readAsText(file, 'Shift_JIS');
             };
             
-            console.log('Starting to read file...');
+            console.log('Starting to read file with UTF-8...');
             reader.readAsText(file, 'UTF-8');
             
             // ファイル入力をリセット（同じファイルを再度選択できるように）
             event.target.value = '';
+        }
+
+        function processCSVText(text) {
+            console.log('Processing CSV text, length:', text.length);
+            console.log('First 200 chars:', text.substring(0, 200));
+            
+            // BOMを除去
+            if (text.charCodeAt(0) === 0xFEFF) {
+                text = text.substring(1);
+                console.log('BOM removed');
+            }
+            
+            // 改行で分割（Windows、Mac、Unix形式すべてに対応）
+            const lines = text.split(/\r\n|\r|\n/);
+            console.log('Total lines:', lines.length);
+            
+            const newTasks = [];
+            
+            // 1行目はヘッダーなのでスキップ、2行目から処理
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+                
+                if (!line || line.length === 0) {
+                    console.log(`Line ${i}: Empty, skipping`);
+                    continue;
+                }
+                
+                console.log(`\nProcessing line ${i}:`, line);
+                
+                // シンプルなCSVパース
+                const values = [];
+                let currentValue = '';
+                let insideQuotes = false;
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    const nextChar = line[j + 1];
+                    
+                    if (char === '"') {
+                        if (insideQuotes && nextChar === '"') {
+                            // エスケープされたダブルクォート
+                            currentValue += '"';
+                            j++; // 次の文字をスキップ
+                        } else {
+                            // クォートの開始または終了
+                            insideQuotes = !insideQuotes;
+                        }
+                    } else if (char === ',' && !insideQuotes) {
+                        // フィールドの区切り
+                        values.push(currentValue);
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                
+                // 最後のフィールドを追加
+                values.push(currentValue);
+                
+                console.log(`Parsed values (${values.length}):`, values);
+                
+                // 6つのフィールドが必要
+                if (values.length >= 6) {
+                    const task = {
+                        id: Date.now() + i + Math.random() * 1000,
+                        name: values[0].trim(),
+                        assignee: values[1].trim(),
+                        startDate: values[2].trim(),
+                        endDate: values[3].trim(),
+                        phase: values[4].trim(),
+                        status: values[5].trim()
+                    };
+                    
+                    console.log('Created task:', task);
+                    newTasks.push(task);
+                } else {
+                    console.log(`Line ${i}: Not enough fields (need 6, got ${values.length}), skipping`);
+                }
+            }
+            
+            console.log('\n=== Import Summary ===');
+            console.log('Successfully parsed tasks:', newTasks.length);
+            console.log('Tasks:', newTasks);
+            
+            if (newTasks.length > 0) {
+                // タスクの内容をプレビュー表示
+                let preview = `${newTasks.length}件のタスクをインポートしますか？\n\n【プレビュー】\n`;
+                newTasks.slice(0, 3).forEach((task, index) => {
+                    preview += `${index + 1}. ${task.name} (${task.assignee})\n`;
+                });
+                if (newTasks.length > 3) {
+                    preview += `...他${newTasks.length - 3}件\n`;
+                }
+                preview += '\n既存のデータに追加されます。';
+                
+                if (confirm(preview)) {
+                    const store = getCurrentStore();
+                    store.tasks = store.tasks.concat(newTasks);
+                    saveData();
+                    renderAll();
+                    alert(`✅ ${newTasks.length}件のタスクをインポートしました！`);
+                }
+            } else {
+                alert('❌ インポートできるタスクが見つかりませんでした。\n\nCSVファイルの形式を確認してください：\n・1行目: ヘッダー行（タスク名,担当者,開始日,終了日,フェーズ,ステータス）\n・2行目以降: データ行\n・文字コード: UTF-8またはShift_JIS\n\nコンソール（F12キー）でデバッグ情報を確認できます。');
+            }
         }
 
         function exportJSON() {
