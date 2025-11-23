@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(2).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(3).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1001,6 +1001,33 @@
         </div>
     </div>
 
+    <!-- パスワード変更モーダル -->
+    <div id="passwordChangeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">パスワード変更</h2>
+            </div>
+            <form onsubmit="changePassword(event)">
+                <div class="form-group">
+                    <label class="form-label">現在のパスワード</label>
+                    <input type="password" id="currentPassword" class="form-input" required="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">新しいパスワード</label>
+                    <input type="password" id="newPassword" class="form-input" required="" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">新しいパスワード（確認）</label>
+                    <input type="password" id="newPasswordConfirm" class="form-input" required="" minlength="6">
+                </div>
+                <div class="btn-group" style="margin-top: 16px;">
+                    <button type="submit" class="btn btn-primary">変更</button>
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordChangeModal()">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- サイドバー -->
         <aside class="sidebar">
@@ -1024,7 +1051,10 @@
                     </select>
                 </div>
 
-                <button class="btn btn-secondary" onclick="logout()" style="width: 100%; margin-top: 12px;">ログアウト</button>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button class="btn btn-secondary" onclick="openPasswordChangeModal()" style="flex: 1; font-size: 13px;">🔐 パスワード変更</button>
+                    <button class="btn btn-secondary" onclick="logout()" style="flex: 1; font-size: 13px;">ログアウト</button>
+                </div>
             </div>
 
             <nav class="nav-menu">
@@ -1239,6 +1269,9 @@
                         <div class="btn-group">
                             <button class="btn btn-danger" onclick="deleteStore()">🗑️ 現在の店舗を削除</button>
                         </div>
+                        <p style="margin-top: 12px; padding: 12px; background: rgba(255, 149, 0, 0.1); border-radius: 8px; font-size: 13px; color: var(--warning);">
+                            ⚠️ 店舗削除パスワード: <strong>delete123</strong>
+                        </p>
                     </div>
 
                     <div class="card">
@@ -1389,6 +1422,50 @@
                 }
                 location.reload();
             }
+        }
+
+        // パスワード変更モーダル
+        function openPasswordChangeModal() {
+            document.getElementById('passwordChangeModal').classList.add('active');
+        }
+
+        function closePasswordChangeModal() {
+            document.getElementById('passwordChangeModal').classList.remove('active');
+            document.getElementById('passwordChangeModal').querySelector('form').reset();
+        }
+
+        // パスワード変更
+        function changePassword(event) {
+            event.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const newPasswordConfirm = document.getElementById('newPasswordConfirm').value;
+
+            // 現在のパスワード確認
+            if (currentUser.password !== currentPassword) {
+                alert('現在のパスワードが正しくありません。');
+                return;
+            }
+
+            // 新しいパスワードの確認
+            if (newPassword !== newPasswordConfirm) {
+                alert('新しいパスワードが一致しません。');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('パスワードは6文字以上で設定してください。');
+                return;
+            }
+
+            // パスワード更新
+            users[currentUser.email].password = newPassword;
+            currentUser.password = newPassword;
+            saveUsers();
+
+            closePasswordChangeModal();
+            alert('パスワードを変更しました！');
         }
 
         // ユーザー登録モーダル
@@ -2206,17 +2283,35 @@
                 return;
             }
 
-            let csv = '\uFEFFタスク名,担当者,開始日,終了日,フェーズ,ステータス\n';
+            // BOM付きUTF-8で出力（Excel対応）
+            const BOM = '\uFEFF';
+            let csv = BOM + 'タスク名,担当者,開始日,終了日,フェーズ,ステータス\n';
             
             store.tasks.forEach(task => {
-                csv += `"${task.name}","${task.assignee}","${task.startDate}","${task.endDate}","${task.phase}","${task.status}"\n`;
+                // カンマやダブルクォートを含む可能性があるのでエスケープ
+                const escapeCsv = (str) => {
+                    if (str === null || str === undefined) return '""';
+                    str = String(str);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return '"' + str.replace(/"/g, '""') + '"';
+                    }
+                    return '"' + str + '"';
+                };
+
+                csv += `${escapeCsv(task.name)},${escapeCsv(task.assignee)},${escapeCsv(task.startDate)},${escapeCsv(task.endDate)},${escapeCsv(task.phase)},${escapeCsv(task.status)}\n`;
             });
             
+            // Blobを作成してダウンロード
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${stores[currentStore].name}_タスク_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${stores[currentStore].name}_タスク_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
             
             alert('CSVエクスポートが完了しました！');
         }
@@ -2224,56 +2319,101 @@
         function importCSV(event) {
             if (!canEdit('full')) {
                 alert('管理者のみがタスクをインポートできます。');
+                event.target.value = '';
                 return;
             }
 
             const file = event.target.files[0];
             if (!file) return;
+
+            console.log('CSV Import started:', file.name);
             
             const reader = new FileReader();
             reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                const newTasks = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
+                try {
+                    const text = e.target.result;
+                    console.log('File read successfully');
                     
-                    // CSVパース（ダブルクォートで囲まれた値を処理）
-                    const regex = /"([^"]*)"/g;
-                    const matches = [];
-                    let match;
-                    while ((match = regex.exec(line)) !== null) {
-                        matches.push(match[1]);
+                    // BOMを除去
+                    const cleanText = text.replace(/^\uFEFF/, '');
+                    const lines = cleanText.split(/\r?\n/);
+                    
+                    console.log('Total lines:', lines.length);
+                    
+                    const newTasks = [];
+                    
+                    // ヘッダー行をスキップして2行目から処理
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        
+                        console.log('Processing line:', i, line);
+                        
+                        // CSVパース（ダブルクォートで囲まれた値を処理）
+                        const columns = [];
+                        let current = '';
+                        let inQuotes = false;
+                        
+                        for (let j = 0; j < line.length; j++) {
+                            const char = line[j];
+                            
+                            if (char === '"') {
+                                if (inQuotes && line[j + 1] === '"') {
+                                    current += '"';
+                                    j++;
+                                } else {
+                                    inQuotes = !inQuotes;
+                                }
+                            } else if (char === ',' && !inQuotes) {
+                                columns.push(current.trim());
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        columns.push(current.trim());
+                        
+                        console.log('Parsed columns:', columns);
+                        
+                        if (columns.length >= 6) {
+                            const task = {
+                                id: Date.now() + i,
+                                name: columns[0].replace(/^"|"$/g, ''),
+                                assignee: columns[1].replace(/^"|"$/g, ''),
+                                startDate: columns[2].replace(/^"|"$/g, ''),
+                                endDate: columns[3].replace(/^"|"$/g, ''),
+                                phase: columns[4].replace(/^"|"$/g, ''),
+                                status: columns[5].replace(/^"|"$/g, '')
+                            };
+                            newTasks.push(task);
+                            console.log('Task created:', task);
+                        }
                     }
                     
-                    if (matches.length >= 6) {
-                        const task = {
-                            id: Date.now() + i,
-                            name: matches[0],
-                            assignee: matches[1],
-                            startDate: matches[2],
-                            endDate: matches[3],
-                            phase: matches[4],
-                            status: matches[5]
-                        };
-                        newTasks.push(task);
+                    console.log('Total tasks parsed:', newTasks.length);
+                    
+                    if (newTasks.length > 0) {
+                        if (confirm(`${newTasks.length}件のタスクをインポートしますか？\n既存のデータに追加されます。`)) {
+                            const store = getCurrentStore();
+                            store.tasks = store.tasks.concat(newTasks);
+                            saveData();
+                            renderAll();
+                            alert('インポートが完了しました！');
+                        }
+                    } else {
+                        alert('有効なタスクデータが見つかりませんでした。\nCSVファイルの形式を確認してください。');
                     }
-                }
-                
-                if (newTasks.length > 0) {
-                    if (confirm(`${newTasks.length}件のタスクをインポートしますか？\n既存のデータに追加されます。`)) {
-                        const store = getCurrentStore();
-                        store.tasks = store.tasks.concat(newTasks);
-                        saveData();
-                        renderAll();
-                        alert('インポートが完了しました！');
-                    }
-                } else {
-                    alert('有効なタスクデータが見つかりませんでした。');
+                } catch (error) {
+                    console.error('CSV Import Error:', error);
+                    alert('CSVファイルの読み込みに失敗しました。\nファイル形式を確認してください。');
                 }
             };
+            
+            reader.onerror = function() {
+                console.error('FileReader Error');
+                alert('ファイルの読み込みに失敗しました。');
+            };
+            
             reader.readAsText(file, 'UTF-8');
             event.target.value = '';
         }
