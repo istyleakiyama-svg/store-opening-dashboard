@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(4).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(5).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1058,7 +1058,7 @@
             </div>
 
             <nav class="nav-menu">
-                <div class="nav-item" onclick="switchTab(&#39;overview&#39;)">
+                <div class="nav-item active" onclick="switchTab(&#39;overview&#39;)">
                     <span class="icon">📊</span>
                     <span>概要</span>
                 </div>
@@ -1078,7 +1078,7 @@
                     <span class="icon">⏱️</span>
                     <span>タイムライン</span>
                 </div>
-                <div class="nav-item active" onclick="switchTab(&#39;tasks&#39;)">
+                <div class="nav-item" onclick="switchTab(&#39;tasks&#39;)">
                     <span class="icon">📋</span>
                     <span>タスク</span>
                 </div>
@@ -1092,13 +1092,13 @@
         <!-- メインコンテンツ -->
         <main class="main-content">
             <div class="content-header">
-                <h1 id="contentTitle">タスク</h1>
-                <p id="contentSubtitle">タスクの追加と管理</p>
+                <h1 id="contentTitle">概要</h1>
+                <p id="contentSubtitle">プロジェクトの全体像を確認</p>
             </div>
 
             <div class="content-body">
                 <!-- 概要タブ -->
-                <div id="overview" class="tab-content">
+                <div id="overview" class="tab-content active">
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value" id="totalTasks">0</div>
@@ -1122,62 +1122,14 @@
                         <div class="card-header">
                             <h2 class="card-title">フェーズ別進捗</h2>
                         </div>
-                        <div id="phaseProgress"><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">準備期間</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">物件選定</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">内装工事</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">設備導入</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">採用・研修</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div><div style="margin-bottom: 24px;">
-                    <div class="progress-text">
-                        <span style="font-weight: 600;">開業準備</span>
-                        <span>0/0 (0%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div></div>
+                        <div id="phaseProgress"></div>
                     </div>
 
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">最近のタスク</h2>
                         </div>
-                        <div id="recentTasks"><div class="empty-state"><div class="empty-state-text">タスクがありません</div></div></div>
+                        <div id="recentTasks"></div>
                     </div>
                 </div>
 
@@ -1188,7 +1140,7 @@
                             <h2 class="card-title">ガントチャート</h2>
                             <button class="btn btn-primary" onclick="printGantt()">🖨️ 印刷</button>
                         </div>
-                        <div class="gantt-wrapper" id="ganttChart"><div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">タスクがありません</div></div></div>
+                        <div class="gantt-wrapper" id="ganttChart"></div>
                     </div>
                 </div>
 
@@ -1196,140 +1148,14 @@
                 <div id="calendar" class="tab-content">
                     <div class="calendar-container">
                         <div class="calendar-header">
-                            <h2 id="calendarMonth">2025年 11月</h2>
+                            <h2 id="calendarMonth"></h2>
                             <div class="calendar-nav">
                                 <button class="btn btn-secondary" onclick="previousMonth()">◀</button>
                                 <button class="btn btn-secondary" onclick="nextMonth()">▶</button>
                                 <button class="btn btn-secondary" onclick="todayMonth()">今日</button>
                             </div>
                         </div>
-                        <div class="calendar-grid" id="calendarGrid"><div class="calendar-day-header">日</div><div class="calendar-day-header">月</div><div class="calendar-day-header">火</div><div class="calendar-day-header">水</div><div class="calendar-day-header">木</div><div class="calendar-day-header">金</div><div class="calendar-day-header">土</div><div class="calendar-day">
-                    <div class="calendar-day-number">26</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">27</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">28</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">29</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">30</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">31</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">1</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">2</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">3</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">4</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">5</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">6</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">7</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">8</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">9</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">10</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">11</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">12</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">13</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">14</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">15</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">16</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">17</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">18</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">19</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">20</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">21</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">22</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day today">
-                    <div class="calendar-day-number">23</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">24</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">25</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">26</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">27</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">28</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">29</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">30</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">1</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">2</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">3</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">4</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">5</div>
-                    <div class="calendar-day-tasks"></div>
-                </div><div class="calendar-day">
-                    <div class="calendar-day-number">6</div>
-                    <div class="calendar-day-tasks"></div>
-                </div></div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
                     </div>
                 </div>
 
@@ -1340,7 +1166,7 @@
                             <h2 class="card-title">スタッフ登録</h2>
                             <button class="btn btn-primary" onclick="openStaffModal()">➕ 新規登録</button>
                         </div>
-                        <div class="staff-grid" id="staffList"><div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">スタッフが登録されていません</div></div></div>
+                        <div class="staff-grid" id="staffList"></div>
                     </div>
                 </div>
 
@@ -1350,12 +1176,12 @@
                         <div class="card-header">
                             <h2 class="card-title">プロジェクトタイムライン</h2>
                         </div>
-                        <div class="task-list" id="timelineView"><div class="empty-state"><div class="empty-state-icon">⏱️</div><div class="empty-state-text">タスクがありません</div></div></div>
+                        <div class="task-list" id="timelineView"></div>
                     </div>
                 </div>
 
                 <!-- タスクタブ -->
-                <div id="tasks" class="tab-content active">
+                <div id="tasks" class="tab-content">
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">タスク管理</h2>
@@ -1376,9 +1202,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">担当者</label>
-                                    <select id="taskAssignee" class="form-select" required="">
-                                        <option value="">選択してください</option>
-                                    </select>
+                                    <input type="text" id="taskAssignee" class="form-input" placeholder="担当者名を入力" required="">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">開始日</label>
@@ -1413,7 +1237,7 @@
                             </form>
                         </div>
 
-                        <div class="task-list" id="taskList"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">タスクがありません</div></div></div>
+                        <div class="task-list" id="taskList"></div>
                     </div>
                 </div>
 
@@ -1424,7 +1248,7 @@
                             <h2 class="card-title">ユーザー管理</h2>
                             <button class="btn btn-primary" onclick="openUserRegisterModal()">➕ 新規ユーザー登録</button>
                         </div>
-                        <div id="userList"><p style="color: var(--text-secondary);">管理者のみがユーザー管理を行えます。</p></div>
+                        <div id="userList"></div>
                     </div>
 
                     <div class="card">
@@ -2271,13 +2095,6 @@
             });
             
             staffList.innerHTML = html;
-            
-            // 担当者セレクターも更新
-            const assigneeSelect = document.getElementById('taskAssignee');
-            assigneeSelect.innerHTML = '<option value="">選択してください</option>';
-            store.staff.forEach(staff => {
-                assigneeSelect.innerHTML += `<option value="${staff.name}">${staff.name}</option>`;
-            });
         }
 
         // タスクリスト描画
