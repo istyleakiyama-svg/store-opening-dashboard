@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(3).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(4).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1058,7 +1058,7 @@
             </div>
 
             <nav class="nav-menu">
-                <div class="nav-item active" onclick="switchTab(&#39;overview&#39;)">
+                <div class="nav-item" onclick="switchTab(&#39;overview&#39;)">
                     <span class="icon">📊</span>
                     <span>概要</span>
                 </div>
@@ -1078,7 +1078,7 @@
                     <span class="icon">⏱️</span>
                     <span>タイムライン</span>
                 </div>
-                <div class="nav-item" onclick="switchTab(&#39;tasks&#39;)">
+                <div class="nav-item active" onclick="switchTab(&#39;tasks&#39;)">
                     <span class="icon">📋</span>
                     <span>タスク</span>
                 </div>
@@ -1092,13 +1092,13 @@
         <!-- メインコンテンツ -->
         <main class="main-content">
             <div class="content-header">
-                <h1 id="contentTitle">概要</h1>
-                <p id="contentSubtitle">プロジェクトの全体像を確認</p>
+                <h1 id="contentTitle">タスク</h1>
+                <p id="contentSubtitle">タスクの追加と管理</p>
             </div>
 
             <div class="content-body">
                 <!-- 概要タブ -->
-                <div id="overview" class="tab-content active">
+                <div id="overview" class="tab-content">
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value" id="totalTasks">0</div>
@@ -1122,14 +1122,62 @@
                         <div class="card-header">
                             <h2 class="card-title">フェーズ別進捗</h2>
                         </div>
-                        <div id="phaseProgress"></div>
+                        <div id="phaseProgress"><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">準備期間</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">物件選定</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">内装工事</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">設備導入</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">採用・研修</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div><div style="margin-bottom: 24px;">
+                    <div class="progress-text">
+                        <span style="font-weight: 600;">開業準備</span>
+                        <span>0/0 (0%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div></div>
                     </div>
 
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">最近のタスク</h2>
                         </div>
-                        <div id="recentTasks"></div>
+                        <div id="recentTasks"><div class="empty-state"><div class="empty-state-text">タスクがありません</div></div></div>
                     </div>
                 </div>
 
@@ -1140,7 +1188,7 @@
                             <h2 class="card-title">ガントチャート</h2>
                             <button class="btn btn-primary" onclick="printGantt()">🖨️ 印刷</button>
                         </div>
-                        <div class="gantt-wrapper" id="ganttChart"></div>
+                        <div class="gantt-wrapper" id="ganttChart"><div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">タスクがありません</div></div></div>
                     </div>
                 </div>
 
@@ -1148,14 +1196,140 @@
                 <div id="calendar" class="tab-content">
                     <div class="calendar-container">
                         <div class="calendar-header">
-                            <h2 id="calendarMonth"></h2>
+                            <h2 id="calendarMonth">2025年 11月</h2>
                             <div class="calendar-nav">
                                 <button class="btn btn-secondary" onclick="previousMonth()">◀</button>
                                 <button class="btn btn-secondary" onclick="nextMonth()">▶</button>
                                 <button class="btn btn-secondary" onclick="todayMonth()">今日</button>
                             </div>
                         </div>
-                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div class="calendar-grid" id="calendarGrid"><div class="calendar-day-header">日</div><div class="calendar-day-header">月</div><div class="calendar-day-header">火</div><div class="calendar-day-header">水</div><div class="calendar-day-header">木</div><div class="calendar-day-header">金</div><div class="calendar-day-header">土</div><div class="calendar-day">
+                    <div class="calendar-day-number">26</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">27</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">28</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">29</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">30</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">31</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">1</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">2</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">3</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">4</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">5</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">6</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">7</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">8</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">9</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">10</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">11</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">12</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">13</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">14</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">15</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">16</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">17</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">18</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">19</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">20</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">21</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">22</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day today">
+                    <div class="calendar-day-number">23</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">24</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">25</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">26</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">27</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">28</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">29</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">30</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">1</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">2</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">3</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">4</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">5</div>
+                    <div class="calendar-day-tasks"></div>
+                </div><div class="calendar-day">
+                    <div class="calendar-day-number">6</div>
+                    <div class="calendar-day-tasks"></div>
+                </div></div>
                     </div>
                 </div>
 
@@ -1166,7 +1340,7 @@
                             <h2 class="card-title">スタッフ登録</h2>
                             <button class="btn btn-primary" onclick="openStaffModal()">➕ 新規登録</button>
                         </div>
-                        <div class="staff-grid" id="staffList"></div>
+                        <div class="staff-grid" id="staffList"><div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">スタッフが登録されていません</div></div></div>
                     </div>
                 </div>
 
@@ -1176,12 +1350,12 @@
                         <div class="card-header">
                             <h2 class="card-title">プロジェクトタイムライン</h2>
                         </div>
-                        <div class="task-list" id="timelineView"></div>
+                        <div class="task-list" id="timelineView"><div class="empty-state"><div class="empty-state-icon">⏱️</div><div class="empty-state-text">タスクがありません</div></div></div>
                     </div>
                 </div>
 
                 <!-- タスクタブ -->
-                <div id="tasks" class="tab-content">
+                <div id="tasks" class="tab-content active">
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">タスク管理</h2>
@@ -1239,7 +1413,7 @@
                             </form>
                         </div>
 
-                        <div class="task-list" id="taskList"></div>
+                        <div class="task-list" id="taskList"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">タスクがありません</div></div></div>
                     </div>
                 </div>
 
@@ -1250,7 +1424,7 @@
                             <h2 class="card-title">ユーザー管理</h2>
                             <button class="btn btn-primary" onclick="openUserRegisterModal()">➕ 新規ユーザー登録</button>
                         </div>
-                        <div id="userList"></div>
+                        <div id="userList"><p style="color: var(--text-secondary);">管理者のみがユーザー管理を行えます。</p></div>
                     </div>
 
                     <div class="card">
@@ -2324,73 +2498,102 @@
             }
 
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
 
-            console.log('CSV Import started:', file.name);
+            console.log('=== CSV Import Start ===');
+            console.log('File name:', file.name);
+            console.log('File size:', file.size, 'bytes');
+            console.log('File type:', file.type);
             
             const reader = new FileReader();
+            
             reader.onload = function(e) {
                 try {
-                    const text = e.target.result;
-                    console.log('File read successfully');
+                    let text = e.target.result;
+                    console.log('Raw file content length:', text.length);
+                    console.log('First 200 chars:', text.substring(0, 200));
                     
                     // BOMを除去
-                    const cleanText = text.replace(/^\uFEFF/, '');
-                    const lines = cleanText.split(/\r?\n/);
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.substring(1);
+                        console.log('BOM removed');
+                    }
                     
+                    // 改行で分割
+                    const lines = text.split(/\r\n|\r|\n/);
                     console.log('Total lines:', lines.length);
+                    console.log('Lines:', lines);
                     
                     const newTasks = [];
                     
-                    // ヘッダー行をスキップして2行目から処理
+                    // 1行目はヘッダーなのでスキップ、2行目から処理
                     for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
+                        let line = lines[i].trim();
                         
-                        console.log('Processing line:', i, line);
+                        if (!line || line.length === 0) {
+                            console.log(`Line ${i}: Empty, skipping`);
+                            continue;
+                        }
                         
-                        // CSVパース（ダブルクォートで囲まれた値を処理）
-                        const columns = [];
-                        let current = '';
-                        let inQuotes = false;
+                        console.log(`\nProcessing line ${i}:`, line);
+                        
+                        // シンプルなCSVパース
+                        const values = [];
+                        let currentValue = '';
+                        let insideQuotes = false;
                         
                         for (let j = 0; j < line.length; j++) {
                             const char = line[j];
+                            const nextChar = line[j + 1];
                             
                             if (char === '"') {
-                                if (inQuotes && line[j + 1] === '"') {
-                                    current += '"';
-                                    j++;
+                                if (insideQuotes && nextChar === '"') {
+                                    // エスケープされたダブルクォート
+                                    currentValue += '"';
+                                    j++; // 次の文字をスキップ
                                 } else {
-                                    inQuotes = !inQuotes;
+                                    // クォートの開始または終了
+                                    insideQuotes = !insideQuotes;
                                 }
-                            } else if (char === ',' && !inQuotes) {
-                                columns.push(current.trim());
-                                current = '';
+                            } else if (char === ',' && !insideQuotes) {
+                                // フィールドの区切り
+                                values.push(currentValue);
+                                currentValue = '';
                             } else {
-                                current += char;
+                                currentValue += char;
                             }
                         }
-                        columns.push(current.trim());
                         
-                        console.log('Parsed columns:', columns);
+                        // 最後のフィールドを追加
+                        values.push(currentValue);
                         
-                        if (columns.length >= 6) {
+                        console.log(`Parsed values (${values.length}):`, values);
+                        
+                        // 6つのフィールドが必要
+                        if (values.length >= 6) {
                             const task = {
-                                id: Date.now() + i,
-                                name: columns[0].replace(/^"|"$/g, ''),
-                                assignee: columns[1].replace(/^"|"$/g, ''),
-                                startDate: columns[2].replace(/^"|"$/g, ''),
-                                endDate: columns[3].replace(/^"|"$/g, ''),
-                                phase: columns[4].replace(/^"|"$/g, ''),
-                                status: columns[5].replace(/^"|"$/g, '')
+                                id: Date.now() + i + Math.random() * 1000,
+                                name: values[0].trim(),
+                                assignee: values[1].trim(),
+                                startDate: values[2].trim(),
+                                endDate: values[3].trim(),
+                                phase: values[4].trim(),
+                                status: values[5].trim()
                             };
+                            
+                            console.log('Created task:', task);
                             newTasks.push(task);
-                            console.log('Task created:', task);
+                        } else {
+                            console.log(`Line ${i}: Not enough fields (need 6, got ${values.length}), skipping`);
                         }
                     }
                     
-                    console.log('Total tasks parsed:', newTasks.length);
+                    console.log('\n=== Import Summary ===');
+                    console.log('Successfully parsed tasks:', newTasks.length);
+                    console.log('Tasks:', newTasks);
                     
                     if (newTasks.length > 0) {
                         if (confirm(`${newTasks.length}件のタスクをインポートしますか？\n既存のデータに追加されます。`)) {
@@ -2398,23 +2601,30 @@
                             store.tasks = store.tasks.concat(newTasks);
                             saveData();
                             renderAll();
-                            alert('インポートが完了しました！');
+                            alert(`✅ ${newTasks.length}件のタスクをインポートしました！`);
                         }
                     } else {
-                        alert('有効なタスクデータが見つかりませんでした。\nCSVファイルの形式を確認してください。');
+                        alert('❌ インポートできるタスクが見つかりませんでした。\n\nCSVファイルの形式を確認してください：\n・1行目: ヘッダー行（タスク名,担当者,開始日,終了日,フェーズ,ステータス）\n・2行目以降: データ行\n\nコンソール（F12キー）でデバッグ情報を確認できます。');
                     }
+                    
                 } catch (error) {
-                    console.error('CSV Import Error:', error);
-                    alert('CSVファイルの読み込みに失敗しました。\nファイル形式を確認してください。');
+                    console.error('=== CSV Import Error ===');
+                    console.error('Error:', error);
+                    console.error('Stack:', error.stack);
+                    alert('❌ CSVファイルの読み込み中にエラーが発生しました。\n\n' + error.message + '\n\nコンソール（F12キー）で詳細を確認してください。');
                 }
             };
             
-            reader.onerror = function() {
-                console.error('FileReader Error');
-                alert('ファイルの読み込みに失敗しました。');
+            reader.onerror = function(error) {
+                console.error('=== FileReader Error ===');
+                console.error('Error:', error);
+                alert('❌ ファイルの読み込みに失敗しました。');
             };
             
+            console.log('Starting to read file...');
             reader.readAsText(file, 'UTF-8');
+            
+            // ファイル入力をリセット（同じファイルを再度選択できるように）
             event.target.value = '';
         }
 
