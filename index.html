@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(5).html -->
+<!-- saved from url=(0062)file:///Users/user/Downloads/istyle-store-dashboard%20(6).html -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -848,15 +848,14 @@
         }
 
         /* ファイル入力 */
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
+        input[type="file"] {
+            display: none;
         }
 
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
+        label[for="csvImport"] {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* スクロールバー */
@@ -1186,10 +1185,8 @@
                         <div class="card-header">
                             <h2 class="card-title">タスク管理</h2>
                             <div class="btn-group">
-                                <div class="file-input-wrapper">
-                                    <button class="btn btn-secondary">📥 CSVインポート</button>
-                                    <input type="file" id="csvImport" accept=".csv" onchange="importCSV(event)">
-                                </div>
+                                <label for="csvImport" class="btn btn-secondary" style="cursor: pointer; margin: 0;">📥 CSVインポート</label>
+                                <input type="file" id="csvImport" accept=".csv" onchange="importCSV(event)" style="display: none;">
                                 <button class="btn btn-secondary" onclick="exportCSV()">📤 CSVエクスポート</button>
                             </div>
                         </div>
