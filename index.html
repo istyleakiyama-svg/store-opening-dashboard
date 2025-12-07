@@ -484,38 +484,76 @@
             min-height: 400px;
         }
 
+        /* 2. ガントチャート→スクロールボタンを常時表示させたい */
         .gantt-scroll-wrapper {
-            overflow-x: auto;
-            overflow-y: auto;
+            overflow: scroll; /* auto から scroll に変更 */
+            overflow-x: scroll; /* 横スクロールを明示 */
+            overflow-y: scroll; /* 縦スクロールを明示 */
             flex: 1;
             position: relative;
-            /* スクロール時の背景色問題を防ぐ */
-            background: var(--surface); 
         }
 
+        /* 1. ガントチャート→子、孫タスクの表示/非表示 (新規追加) */
+        /* 閉じているタスクの行は非表示 */
+        .gantt-row.collapsed {
+            display: none;
+        }
+
+        /* 展開/折りたたみボタンのスタイル */
+        .gantt-toggle-btn {
+            display: inline-block;
+            margin-right: 6px;
+            cursor: pointer;
+            font-size: 10px;
+            line-height: 1;
+            transition: transform 0.2s ease;
+            font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; /* 記号が崩れないように */
+            font-weight: 900;
+        }
+
+        /* 展開状態の行（親タスク） */
+        .gantt-row.expanded > .gantt-task-info > div {
+            /* flexを維持してボタンとタスク名を並べる */
+            display: flex;
+            align-items: center;
+        }
+
+        /* 展開状態の時のボタンの向き（▶️から▼へ） */
+        .gantt-row.expanded > .gantt-task-info .gantt-toggle-btn {
+            transform: rotate(90deg);
+        }
+
+        /* 非親タスクの情報部分を調整 */
+        .gantt-row:not(.expanded) > .gantt-task-info > div {
+            display: block; /* ボタンがない場合は縦に積む */
+        }
+        
         .gantt-header-fixed {
             position: sticky;
             top: 0;
             background: var(--surface);
-            z-index: 200; /* タスク名より前面に */
+            z-index: 15;
             padding-bottom: 16px;
             border-bottom: 2px solid var(--border);
-            margin-bottom: 0; /* マージン削除で隙間防止 */
+            margin-bottom: 16px;
         }
 
         .gantt-timeline-wrapper {
             display: flex;
-            /* ここで背景色を指定して隙間を目立たなくする */
-            background-color: var(--surface);
         }
 
         .gantt-task-names {
-            /* 削除: 個別のdivではなくgantt-header-fixed内で制御 */
+            width: 300px;
+            flex-shrink: 0;
+            position: sticky;
+            left: 0;
+            background: var(--surface);
+            z-index: 40;
         }
 
         .gantt-timeline-container {
             flex: 1;
-            min-width: 0; /* フレックスアイテムの縮小を許可 */
+            min-width: 2000px;
         }
 
         .gantt-calendar-header {
@@ -587,7 +625,6 @@
             align-items: stretch;
             border-bottom: 1px solid var(--border);
             min-height: 30px;
-            background: white; /* 行の背景を白に固定 */
         }
 
         .gantt-task-info {
@@ -598,10 +635,8 @@
             background: #FFFFFF !important;
             position: sticky;
             left: 0;
-            z-index: 150; /* チャートバーより前面 */
+            z-index: 150;
             border-right: 2px solid var(--border);
-            /* スクロール時の透け防止 */
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
         }
 
         .gantt-row.level-1 .gantt-task-info {
@@ -709,7 +744,8 @@
             background: var(--surface);
             border-radius: 16px;
             padding: 24px;
-            height: calc(100vh - 220px);
+            /* 3. カレンダー縦幅拡張: 220px -> 100px */
+            height: calc(100vh - 100px); 
             display: flex;
             flex-direction: column;
         }
@@ -915,9 +951,7 @@
             .mobile-menu-btn,
             .btn,
             .task-actions,
-            .calendar-nav,
-            /* 印刷時に隠すボタン類 */
-            .gantt-zoom-controls {
+            .calendar-nav {
                 display: none !important;
             }
 
@@ -936,9 +970,8 @@
 
             .gantt-container {
                 box-shadow: none;
-                border: none;
+                border: 1px solid #000;
                 page-break-inside: avoid;
-                max-height: none !important; /* 高さ制限解除 */
             }
 
             .card-header {
@@ -967,31 +1000,16 @@
                 overflow: visible !important;
                 max-height: none !important;
                 transform: none !important;
-                display: block !important;
-                width: 100% !important;
-            }
-            
-            /* 印刷時に横スクロールを強制的に展開する */
-            .gantt-timeline-wrapper,
-            .gantt-timeline-container {
-                min-width: 0 !important;
-                width: 100% !important;
             }
 
             .gantt-task-info {
-                position: relative; /* 固定を解除 */
+                position: relative;
                 left: auto;
-                border-right: 1px solid #000;
-            }
-            
-            /* 印刷時はページに合わせて縮小 */
-            @page {
-                size: landscape;
-                margin: 1cm;
             }
         }
 
         /* モバイル対応 */
+        /* 4. スマホでも見やすい様に (既存の @media ブロック内に追記/修正) */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
@@ -1052,6 +1070,12 @@
             .calendar-day {
                 min-height: 60px;
                 padding: 4px;
+            }
+
+            /* カレンダーの高さを調整 */
+            .calendar-container {
+                height: auto; 
+                min-height: calc(100vh - 150px); /* 最小高さを設定して見やすくする */
             }
         }
 
@@ -1180,28 +1204,30 @@
                         </div>
                         <div id="dashboardStats"></div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">重要なマイルストーン</h2>
+                        </div>
+                        <div id="milestones">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🎉</div>
+                                <div class="empty-state-text">重要なタスクをマークしましょう</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="gantt" class="tab-content">
-                    <div class="gantt-container">
+                    <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">プロジェクトガントチャート</h2>
-                            <div class="gantt-zoom-controls" style="display: flex; gap: 12px; align-items: center;">
-                                <div style="display: flex; gap: 8px; align-items: center; background: #F5F5F7; padding: 8px 12px; border-radius: 8px;">
-                                    <button class="btn btn-secondary" onclick="zoomOut()" title="縮小">🔍−</button>
-                                    <input type="number" id="zoomInput" value="100" min="1" max="200" 
-                                           onchange="setZoomByInput(this.value)"
-                                           style="width: 60px; text-align: center; border: 2px solid #D2D2D7; border-radius: 6px; padding: 4px; font-weight: 600;">
-                                    <span style="font-weight: 600;">%</span>
-                                    <button class="btn btn-secondary" onclick="zoomIn()" title="拡大">🔍+</button>
-                                    <button class="btn btn-secondary" onclick="fitToScreen()" title="全体表示">↔ 全体</button>
-                                    <button class="btn btn-secondary" onclick="resetZoom()" title="リセット">⟲</button>
-                                </div>
-                                <button class="btn btn-primary" onclick="printGantt()">🖨️ 全体を印刷</button>
-                            </div>
+                            <h2 class="card-title">プロジェクト・ガントチャート</h2>
                         </div>
-                        <div class="gantt-scroll-wrapper" id="ganttScrollWrapper">
-                            <div id="ganttChart"></div>
+                        <div class="gantt-container" id="ganttChart">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📅</div>
+                                <div class="empty-state-text">タスクがありません</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1209,30 +1235,1836 @@
                 <div id="calendar" class="tab-content">
                     <div class="calendar-container">
                         <div class="calendar-header">
-                            <h2 id="calendarMonth"></h2>
-                            <div class="calendar-nav">
+                            <h2 class="card-title" id="calendarTitle">2025年 10月</h2>
+                            <div class="calendar-nav btn-group">
+                                <button class="btn btn-secondary" onclick="todayMonth()">今日</button>
                                 <button class="btn btn-secondary" onclick="previousMonth()">◀</button>
                                 <button class="btn btn-secondary" onclick="nextMonth()">▶</button>
-                                <button class="btn btn-secondary" onclick="todayMonth()">今日</button>
                             </div>
                         </div>
-                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 8px; font-weight: 600; text-align: center; color: var(--text-secondary); flex-shrink: 0;">
+                            <div>日</div>
+                            <div>月</div>
+                            <div>火</div>
+                            <div>水</div>
+                            <div>木</div>
+                            <div>金</div>
+                            <div>土</div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            </div>
                     </div>
                 </div>
 
                 <div id="staff" class="tab-content">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">スタッフ管理</h2>
+                            <h2 class="card-title">スタッフ一覧</h2>
                             <button class="btn btn-primary" onclick="openStaffModal()">➕ スタッフ追加</button>
                         </div>
-                        <div class="staff-grid" id="staffList"></div>
+                        <div class="staff-grid" id="staffList">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">👥</div>
+                                <div class="empty-state-text">スタッフが登録されていません</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div id="timeline" class="tab-content">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">プロジェクトタイムライン</h2>
+                            <h2 class="card-title">タスク・タイムライン (開始日順)</h2>
                         </div>
                         <div id="timelineView">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">⏱️</div>
+                                <div class="empty-state-text">タスクがありません</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tasks" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">タスク追加/編集</h2>
+                        </div>
+                        <form onsubmit="addOrUpdateTask(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label">レベル</label>
+                                <input type="number" id="taskLevel" class="form-input" min="1" max="10" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">親タスク名</label>
+                                <input type="text" id="taskParent" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">タスク名</label>
+                                <input type="text" id="taskName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">担当者</label>
+                                <input type="text" id="taskAssignee" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">メモ</label>
+                                <input type="text" id="taskMemo" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">開始日</label>
+                                <input type="date" id="taskStart" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">終了日</label>
+                                <input type="date" id="taskEnd" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ステータス</label>
+                                <select id="taskStatus" class="form-select" required>
+                                    <option value="未着手">未着手</option>
+                                    <option value="進行中">進行中</option>
+                                    <option value="完了">完了</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="display: flex; align-items: flex-end; gap: 8px;">
+                                <button type="submit" class="btn btn-primary" id="taskSubmitBtn">➕ タスク追加</button>
+                                <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display: none;">キャンセル</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">階層タスクリスト</h2>
+                        </div>
+                        <div class="hierarchical-task-list" id="taskList"></div>
+                    </div>
+                </div>
+
+                <div id="settings" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">店舗管理</h2>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">新規店舗名</label>
+                            <input type="text" id="newStoreName" class="form-input">
+                            <button class="btn btn-secondary" onclick="addStore()" style="margin-top: 10px;">➕ 店舗追加</button>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-danger" onclick="deleteStore()">🗑️ 現在の店舗を削除</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">データ操作</h2>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-secondary" onclick="exportData()">💾 全データのエクスポート</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CSVインポート（タスク）</label>
+                            <div class="import-zone" id="importZone" onclick="document.getElementById('csvFile').click()">
+                                ファイルをドラッグ＆ドロップ または クリックして選択
+                            </div>
+                            <input type="file" id="csvFile" accept=".csv" style="display: none;">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-danger" onclick="deleteAllData()">🚨 全データを削除</button>
+                        </div>
+                    </div>
+
+                    <div class="card" id="userManagement" style="display: none;">
+                        <div class="card-header">
+                            <h2 class="card-title">ユーザー管理</h2>
+                            <button class="btn btn-primary" onclick="openUserModal()">➕ ユーザー追加</button>
+                        </div>
+                        <div id="userList">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="staffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">スタッフ追加/編集</h2>
+            </div>
+            <form id="staffForm" onsubmit="addOrUpdateStaff(event)">
+                <input type="hidden" id="staffId">
+                <div class="form-group">
+                    <label class="form-label">名前</label>
+                    <input type="text" id="staffName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">役割</label>
+                    <select class="form-select" id="staffRole" required>
+                        <option value="店長">店長</option>
+                        <option value="エリアマネージャー">エリアマネージャー</option>
+                        <option value="SV">SV</option>
+                        <option value="社員">社員</option>
+                        <option value="アルバイト">アルバイト</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">電話番号</label>
+                    <input type="tel" id="staffPhone" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">メールアドレス</label>
+                    <input type="email" id="staffEmail" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">入社日</label>
+                    <input type="date" id="staffJoinDate" class="form-input">
+                </div>
+                <div class="btn-group" style="margin-top: 16px;">
+                    <button type="submit" class="btn btn-primary">追加</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeStaffModal()">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">ユーザー追加</h2>
+            </div>
+            <form id="userForm" onsubmit="addUser(event)">
+                <div class="form-group">
+                    <label class="form-label">名前</label>
+                    <input type="text" id="userName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">メールアドレス</label>
+                    <input type="email" id="userEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">初期パスワード</label>
+                    <input type="password" id="userPassword" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">権限</label>
+                    <select class="form-select" id="userRole">
+                        <option value="admin">管理者（全編集権限）</option>
+                        <option value="editor">編集者（進捗変更のみ）</option>
+                    </select>
+                </div>
+                <div class="btn-group" style="margin-top: 16px;">
+                    <button type="submit" class="btn btn-primary">追加</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let stores = {};
+        let currentStore = 'default';
+        let editingTaskId = null;
+        let currentMonth = new Date();
+        let draggedTask = null;
+        let resizingTask = null;
+        let initialX = 0;
+        let initialLeft = 0;
+        let initialWidth = 0;
+        let DAY_WIDTH = 30; 
+        let TASK_COL_WIDTH = 240; // 初期値
+        const DELETE_PASSWORD = 'delete';
+        const STORES_KEY = 'istyle_stores';
+        const USERS_KEY = 'istyle_users';
+        let users = [];
+        let currentUser = null;
+        
+        // ====================================
+        // 1. ガントチャート→子、孫タスクの表示/非表示 (展開状態の変数)
+        // ====================================
+        let ganttExpandedState = JSON.parse(localStorage.getItem('ganttExpandedState')) || {}; // 展開状態を保存する変数
+
+        // データの初期化と保存
+        function loadData() {
+            const savedStores = localStorage.getItem(STORES_KEY);
+            if (savedStores) {
+                stores = JSON.parse(savedStores);
+            } else {
+                stores['default'] = {
+                    name: 'デフォルト店舗',
+                    tasks: [
+                        { id: 1, level: 1, parentName: null, name: "I-STYLE 新店立ち上げプロジェクト", assignee: "佐藤", memo: "全体統括", startDate: "2025-10-01", endDate: "2025-12-31", status: "進行中" },
+                        { id: 2, level: 2, parentName: "I-STYLE 新店立ち上げプロジェクト", name: "フェーズ1: 計画と物件", assignee: "佐藤", memo: "初期計画の確定", startDate: "2025-10-01", endDate: "2025-10-31", status: "完了" },
+                        { id: 3, level: 3, parentName: "フェーズ1: 計画と物件", name: "市場調査", assignee: "田中", memo: "競合店の分析を含む", startDate: "2025-10-01", endDate: "2025-10-10", status: "完了" },
+                        { id: 4, level: 3, parentName: "フェーズ1: 計画と物件", name: "物件契約", assignee: "佐藤", memo: "重要タスク", startDate: "2025-10-11", endDate: "2025-10-31", status: "完了" },
+                        { id: 5, level: 2, parentName: "I-STYLE 新店立ち上げプロジェクト", name: "フェーズ2: 内装とシステム", assignee: "高橋", memo: "内装業者とシステムベンダーの選定", startDate: "2025-11-01", endDate: "2025-11-30", status: "進行中" },
+                        { id: 6, level: 3, parentName: "フェーズ2: 内装とシステム", name: "内装設計確定", assignee: "高橋", memo: "デザイン最終決定", startDate: "2025-11-01", endDate: "2025-11-15", status: "進行中" },
+                        { id: 7, level: 4, parentName: "内装設計確定", name: "内装子タスク１", assignee: "高橋", memo: "子タスクのテスト", startDate: "2025-11-01", endDate: "2025-11-08", status: "進行中" },
+                        { id: 8, level: 4, parentName: "内装設計確定", name: "内装子タスク２", assignee: "高橋", memo: "子タスクのテスト", startDate: "2025-11-09", endDate: "2025-11-15", status: "未着手" },
+                        { id: 9, level: 3, parentName: "フェーズ2: 内装とシステム", name: "POSシステム発注", assignee: "鈴木", memo: "初期設定作業も含む", startDate: "2025-11-16", endDate: "2025-11-30", status: "未着手" },
+                        { id: 10, level: 2, parentName: "I-STYLE 新店立ち上げプロジェクト", name: "フェーズ3: 採用とトレーニング", assignee: "山本", memo: "オープンに向けた人員確保", startDate: "2025-12-01", endDate: "2025-12-31", status: "未着手" },
+                        { id: 11, level: 3, parentName: "フェーズ3: 採用とトレーニング", name: "求人広告開始", assignee: "山本", memo: "", startDate: "2025-12-01", endDate: "2025-12-15", status: "未着手" },
+                    ],
+                    staff: [
+                        { id: 101, name: "佐藤 太郎", role: "店長", phone: "090-1111-2222", email: "sato@istyle.com", joinDate: "2025-10-01" },
+                        { id: 102, name: "田中 次郎", role: "社員", phone: "080-3333-4444", email: "tanaka@istyle.com", joinDate: "2025-10-15" },
+                        { id: 103, name: "高橋 花子", role: "SV", phone: "070-5555-6666", email: "takahashi@istyle.com", joinDate: "2025-09-01" },
+                    ]
+                };
+            }
+
+            const savedCurrentStore = localStorage.getItem('istyle_currentStore');
+            if (savedCurrentStore && stores[savedCurrentStore]) {
+                currentStore = savedCurrentStore;
+            } else if (Object.keys(stores).length > 0) {
+                currentStore = Object.keys(stores)[0];
+            } else {
+                currentStore = 'default';
+            }
+            
+            const savedUsers = localStorage.getItem(USERS_KEY);
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            } else {
+                 users = [
+                    { id: 1, name: '管理者', email: 'admin@istyle.com', password: 'password', role: 'admin' },
+                    { id: 2, name: '編集者', email: 'editor@istyle.com', password: 'password', role: 'editor' },
+                ];
+            }
+            
+            const savedUser = localStorage.getItem('istyle_currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORES_KEY, JSON.stringify(stores));
+            localStorage.setItem('istyle_currentStore', currentStore);
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function getCurrentStore() {
+            return stores[currentStore];
+        }
+
+        // 店舗セレクターの初期化
+        function initializeStoreSelector() {
+            const select = document.getElementById('storeSelect');
+            select.innerHTML = ''; // クリア
+            Object.entries(stores).forEach(([id, store]) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = store.name;
+                select.appendChild(option);
+            });
+            select.value = currentStore;
+        }
+
+        // 店舗切り替え
+        function switchStore() {
+            const select = document.getElementById('storeSelect');
+            currentStore = select.value;
+            saveData();
+            renderAll();
+        }
+
+        // 店舗追加
+        function addStore() {
+            const nameInput = document.getElementById('newStoreName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('店舗名を入力してください。');
+                return;
+            }
+            const storeId = 'store_' + Date.now();
+            stores[storeId] = { name: name, tasks: [], staff: [] };
+            currentStore = storeId;
+            saveData();
+            initializeStoreSelector();
+            renderAll();
+            nameInput.value = '';
+            alert(`✅ ${name}を追加しました！`);
+        }
+
+        // 店舗削除（パスワード保護）
+        function deleteStore() {
+            if (!currentStore || currentStore === 'default') {
+                alert('デフォルト店舗は削除できません。');
+                return;
+            }
+            const storeName = stores[currentStore].name;
+            const password = prompt(`${storeName}を削除します。\nパスワードを入力してください:`);
+            if (password !== DELETE_PASSWORD) {
+                if (password !== null) {
+                    alert('❌ パスワードが間違っています。');
+                }
+                return;
+            }
+            if (confirm(`本当に${storeName}を削除しますか？この操作は取り消せません。`)) {
+                delete stores[currentStore];
+                const remainingStores = Object.keys(stores);
+                if (remainingStores.length === 0) {
+                    stores['default'] = { name: 'デフォルト店舗', tasks: [], staff: [] };
+                    currentStore = 'default';
+                } else {
+                    currentStore = remainingStores[0];
+                }
+                saveData();
+                initializeStoreSelector();
+                renderAll();
+                alert('✅ 店舗を削除しました。');
+            }
+        }
+
+        // タブ切り替え
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+
+            const titles = {
+                dashboard: { title: 'ダッシュボード', desc: 'プロジェクトの進捗を一目で確認' },
+                gantt: { title: 'ガントチャート', desc: 'スケジュールを視覚的に管理' },
+                calendar: { title: 'カレンダー', desc: '月間カレンダーでタスクを確認' },
+                staff: { title: 'スタッフ', desc: 'チームメンバーを管理' },
+                timeline: { title: 'タイムライン', desc: 'タスクを時系列で表示' },
+                tasks: { title: 'タスク管理', desc: '階層構造でタスクを管理' },
+                settings: { title: '設定', desc: '店舗、データ、ユーザーの管理' }
+            };
+
+            const info = titles[tabName] || { title: '', desc: '' };
+            document.getElementById('pageTitle').textContent = info.title;
+            document.getElementById('pageDescription').textContent = info.desc;
+            
+            // タブが切り替わったら再レンダリング
+            if (tabName === 'gantt') {
+                renderGanttChart();
+            } else if (tabName === 'calendar') {
+                renderCalendar();
+            } else if (tabName === 'timeline') {
+                renderTimeline();
+            }
+        }
+
+        // タスク追加/更新
+        function addOrUpdateTask(event) {
+            event.preventDefault();
+            
+            if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+                alert('権限がありません。タスクの追加・編集は管理者/編集者のみ可能です。');
+                return;
+            }
+
+            const level = parseInt(document.getElementById('taskLevel').value);
+            const parentName = document.getElementById('taskParent').value.trim() || null;
+            const name = document.getElementById('taskName').value.trim();
+            const assignee = document.getElementById('taskAssignee').value.trim();
+            const memo = document.getElementById('taskMemo').value.trim();
+            const startDate = document.getElementById('taskStart').value;
+            const endDate = document.getElementById('taskEnd').value;
+            const status = document.getElementById('taskStatus').value;
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('❌ 終了日は開始日以降の日付を選択してください。');
+                return;
+            }
+
+            const store = getCurrentStore();
+            const tasks = store.tasks;
+
+            if (editingTaskId !== null) {
+                // 更新
+                const task = tasks.find(t => t.id === editingTaskId);
+                if (task) {
+                    task.level = level;
+                    task.parentName = parentName;
+                    task.name = name;
+                    task.assignee = assignee;
+                    task.memo = memo;
+                    task.startDate = startDate;
+                    task.endDate = endDate;
+                    task.status = status;
+                    alert('✅ タスクを更新しました！');
+                }
+            } else {
+                // 新規追加
+                const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+                const newTask = {
+                    id: newId,
+                    level,
+                    parentName,
+                    name,
+                    assignee,
+                    memo,
+                    startDate,
+                    endDate,
+                    status
+                };
+                tasks.push(newTask);
+                alert('✅ タスクを追加しました！');
+            }
+
+            saveData();
+            document.querySelector('#tasks form').reset();
+            cancelEdit(); // フォームをリセット
+            renderAll();
+        }
+
+        // タスクリスト描画 (階層表示)
+        function renderTaskList() {
+            const container = document.getElementById('taskList');
+            const store = getCurrentStore();
+            
+            if (store.tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">タスクがありません</div></div>';
+                return;
+            }
+
+            // 親タスク名からタスクオブジェクトへのマップを作成
+            const taskMapByName = store.tasks.reduce((map, t) => {
+                map[t.name] = t;
+                return map;
+            }, {});
+
+            // ルートタスク (parentNameがないもの) を抽出
+            let rootTasks = store.tasks.filter(t => !t.parentName || !taskMapByName[t.parentName])
+                .sort((a, b) => a.level - b.level); // レベルでソート
+
+            function getChildren(parentName) {
+                return store.tasks.filter(t => t.parentName === parentName)
+                    .sort((a, b) => a.level - b.level);
+            }
+
+            function getStatusClass(status) {
+                if (status === '完了') return 'completed';
+                if (status === '進行中') return 'in-progress';
+                return 'pending';
+            }
+
+            function renderTask(task) {
+                const children = getChildren(task.name);
+                let html = `
+                    <div class="task-item level-${task.level}">
+                        <div class="task-header">
+                            <div class="task-name">${task.name}</div>
+                            <span class="task-status ${getStatusClass(task.status)}">${task.status}</span>
+                        </div>
+                        <div class="task-meta">
+                            ${task.parentName ? `<span>📂 ${task.parentName}</span>` : ''}
+                            ${task.assignee ? `<span class="task-assignee">${task.assignee}</span>` : ''}
+                            <span>📅 ${task.startDate} 〜 ${task.endDate}</span>
+                        </div>
+                        ${task.memo ? `<div class="task-memo">${task.memo}</div>` : ''}
+                        <div class="task-actions">
+                            <button class="btn-edit" onclick="editTask(${task.id})">✏️ 編集</button>
+                            <button class="btn-delete" onclick="deleteTask(${task.id})">🗑️ 削除</button>
+                        </div>
+                    </div>
+                `;
+                
+                if (children.length > 0) {
+                    html += '<div class="child-tasks">';
+                    children.sort((a, b) => a.level - b.level).forEach(child => {
+                        html += renderTask(child);
+                    });
+                    html += '</div>';
+                }
+                
+                return html;
+            }
+
+            container.innerHTML = rootTasks.map(task => `
+                <div class="task-group">
+                    ${renderTask(task)}
+                </div>
+            `).join('');
+        }
+
+        // タスク編集
+        function editTask(id) {
+            if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+                alert('権限がありません。タスクの編集は管理者/編集者のみ可能です。');
+                return;
+            }
+            
+            const store = getCurrentStore();
+            const task = store.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            editingTaskId = id;
+
+            // フォームに値をセット
+            document.getElementById('taskLevel').value = task.level;
+            document.getElementById('taskParent').value = task.parentName;
+            document.getElementById('taskName').value = task.name;
+            document.getElementById('taskAssignee').value = task.assignee;
+            document.getElementById('taskMemo').value = task.memo;
+            document.getElementById('taskStart').value = task.startDate;
+            document.getElementById('taskEnd').value = task.endDate;
+            document.getElementById('taskStatus').value = task.status;
+
+            // タスクタブに切り替え
+            const taskTab = document.querySelector('.nav-item[onclick*="tasks"]');
+            if (taskTab) {
+                taskTab.click();
+            }
+
+            // フォームをハイライト
+            const submitBtn = document.getElementById('taskSubmitBtn');
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            submitBtn.textContent = '✏️ タスクを更新';
+            submitBtn.className = 'btn btn-success';
+            cancelBtn.style.display = 'block';
+
+            // フォームまでスクロール
+            setTimeout(() => {
+                document.querySelector('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+
+            alert('📝 タスクを編集モードで読み込みました。');
+        }
+
+        // 編集キャンセル
+        function cancelEdit() {
+            editingTaskId = null;
+            const submitBtn = document.getElementById('taskSubmitBtn');
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            submitBtn.textContent = '➕ タスク追加';
+            submitBtn.className = 'btn btn-primary';
+            cancelBtn.style.display = 'none';
+            document.querySelector('#tasks form').reset();
+        }
+
+        // タスク削除（パスワード保護）
+        function deleteTask(id) {
+            if (currentUser.role !== 'admin') {
+                alert('権限がありません。タスクの削除は管理者のみ可能です。');
+                return;
+            }
+            
+            const password = prompt('タスクを削除します。\nパスワードを入力してください:');
+            if (password !== DELETE_PASSWORD) {
+                if (password !== null) {
+                    alert('❌ パスワードが間違っています。');
+                }
+                return;
+            }
+            if (confirm('このタスクを削除しますか？')) {
+                const store = getCurrentStore();
+                store.tasks = store.tasks.filter(t => t.id !== id);
+                saveData();
+                renderAll();
+                alert('✅ タスクを削除しました。');
+            }
+        }
+
+        // ガントチャート描画（2025年10月〜2030年12月、日別）
+        function renderGanttChart() {
+            const container = document.getElementById('ganttChart');
+            const store = getCurrentStore();
+            if (store.tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">タスクがありません</div></div>';
+                return;
+            }
+
+            // タスクを階層構造に変換し、フラットなリストとして描画順序を決定する
+            const taskMap = store.tasks.reduce((map, t) => { map[t.id] = {...t}; return map; }, {});
+            // 親タスク名からタスクオブジェクトを引けるマップ (階層構築用)
+            const taskMapByName = store.tasks.reduce((map, t) => { map[t.name] = t; return map; }, {});
+            
+            // ルートタスクを抽出（親タスク名がない、または親タスク名を持つタスクが存在しないもの）
+            const rootTasks = store.tasks.filter(t => !t.parentName || !taskMapByName[t.parentName]).sort((a, b) => a.level - b.level);
+
+            function buildHierarchy(task) {
+                if (!task.id) return null; // IDがないタスクは除外
+                const children = store.tasks.filter(t => t.parentName === task.name).sort((a, b) => a.level - b.level);
+                task.children = children.map(child => buildHierarchy(child)).filter(c => c !== null);
+                return task;
+            }
+            
+            const hierarchicalTasks = rootTasks.map(task => buildHierarchy(task)).filter(t => t !== null);
+            
+            let flatTaskList = [];
+            function flattenTasks(task) {
+                flatTaskList.push(task);
+                if (task.children) {
+                    task.children.forEach(flattenTasks);
+                }
+            }
+            hierarchicalTasks.forEach(flattenTasks);
+
+            // 固定期間: 2025年10月1日 〜 2030年12月31日
+            const minDate = new Date(2025, 9, 1); // 10月は9（0始まり）
+            const maxDate = new Date(2030, 11, 31); // 12月は11
+            
+            // 全日付を生成
+            const allDays = [];
+            let currentDate = new Date(minDate);
+            while (currentDate <= maxDate) {
+                allDays.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            const totalDays = allDays.length;
+            const today = new Date();
+            const todayIndex = allDays.findIndex(d => d.toDateString() === today.toDateString());
+
+            // 年ヘッダー生成
+            const years = {};
+            allDays.forEach(day => {
+                const year = day.getFullYear();
+                if (!years[year]) years[year] = 0;
+                years[year]++;
+            });
+
+            // 月ヘッダー生成
+            const months = {};
+            allDays.forEach(day => {
+                const monthYear = `${day.getFullYear()}-${day.getMonth()}`;
+                if (!months[monthYear]) months[monthYear] = 0;
+                months[monthYear]++;
+            });
+
+            const yearHeaderHtml = Object.keys(years).map(year => 
+                `<div class="gantt-year-block" style="width: ${years[year] * DAY_WIDTH}px;">${year}年</div>`
+            ).join('');
+
+            const monthHeaderHtml = Object.keys(months).map(monthYear => {
+                const monthName = new Date(monthYear.split('-')[0], monthYear.split('-')[1]).toLocaleDateString('ja-JP', { month: 'short' });
+                return `<div class="gantt-month-block" style="width: ${months[monthYear] * DAY_WIDTH}px;">${monthName}</div>`;
+            }).join('');
+
+            const dayHeaderHtml = allDays.map(day => {
+                const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                const isToday = day.toDateString() === today.toDateString();
+                return `<div class="gantt-day-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}" style="width: ${DAY_WIDTH}px;">${day.getDate()}</div>`;
+            }).join('');
+
+            // タスク行の描画
+            const taskRowsHtml = flatTaskList.map(task => {
+                const start = new Date(task.startDate);
+                const end = new Date(task.endDate);
+                const startIndex = allDays.findIndex(d => d.toDateString() === start.toDateString());
+                let endIndex = allDays.findIndex(d => d.toDateString() === end.toDateString());
+                
+                let actualStartIndex = startIndex === -1 ? 0 : startIndex;
+                let actualEndIndex = endIndex === -1 ? allDays.length - 1 : endIndex;
+                
+                if (startIndex === -1 && endIndex === -1) {
+                    actualStartIndex = 0;
+                    actualEndIndex = -1; // 表示しない
+                } else if (startIndex === -1 && endIndex !== -1) {
+                    actualStartIndex = 0;
+                } else if (startIndex !== -1 && endIndex === -1) {
+                    actualEndIndex = allDays.length - 1;
+                }
+
+                const leftPos = actualStartIndex * DAY_WIDTH;
+                const width = (actualEndIndex - actualStartIndex + 1) * DAY_WIDTH;
+                const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                
+                // 階層タスクのトグルボタンを準備
+                const hasChildren = task.children && task.children.length > 0;
+                const isExpanded = ganttExpandedState[task.id] === undefined ? true : ganttExpandedState[task.id]; // デフォルトは展開
+                
+                // 親タスクが閉じている場合は、行を非表示にするために 'collapsed' クラスを適用するロジック
+                let rowClass = `level-${task.level}`;
+                if (hasChildren && isExpanded) {
+                    rowClass += ' expanded';
+                }
+
+                let isChildCollapsed = false;
+                if (task.parentName) {
+                    let currentParentName = task.parentName;
+                    while (currentParentName) {
+                        const parentTask = flatTaskList.find(t => t.name === currentParentName);
+                        if (parentTask) {
+                            // 親の展開状態を確認 (デフォルトは展開 true)
+                            const parentExpanded = ganttExpandedState[parentTask.id] === undefined ? true : ganttExpandedState[parentTask.id];
+                            if (!parentExpanded) {
+                                isChildCollapsed = true;
+                                break;
+                            }
+                            currentParentName = parentTask.parentName; // さらに祖先へ
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                
+                if (isChildCollapsed) {
+                    rowClass += ' collapsed'; // 祖先が閉じているタスクを非表示
+                }
+
+                const toggleButton = hasChildren 
+                    ? `<span class="gantt-toggle-btn" onclick="toggleGanttTask(${task.id})">${isExpanded ? '▼' : '▶️'}</span>`
+                    : '';
+
+                if (width < 0) width = 0; // 終了日が開始日より前の場合は非表示
+                
+                return `
+                    <div class="gantt-row ${rowClass}" id="gantt-row-${task.id}">
+                        <div class="gantt-task-info" style="width: ${TASK_COL_WIDTH}px;">
+                            <div style="width: 100%; overflow: hidden; padding: 4px; display: flex; align-items: center;">
+                                ${toggleButton}
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; margin-bottom: 2px; font-size: ${Math.max(11, Math.min(14, TASK_COL_WIDTH / 15))}px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2;">${task.name}</div>
+                                    <div style="font-size: ${Math.max(9, Math.min(11, TASK_COL_WIDTH / 20))}px; color: var(--text-secondary); line-height: 1.2;">
+                                        ${task.assignee ? `👤 ${task.assignee} | ` : ''}${duration}日間 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gantt-timeline-row">
+                            <div class="gantt-timeline-bg" style="width: ${totalDays * DAY_WIDTH}px;">
+                                ${allDays.map((d, i) => {
+                                    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                                    return `<div class="gantt-day-bg ${isWeekend ? 'weekend' : ''}" style="width: ${DAY_WIDTH}px;"></div>`;
+                                }).join('')}
+                            </div>
+                            ${actualEndIndex >= actualStartIndex && width > 0 ? `
+                                <div class="gantt-bar" 
+                                    data-task-id="${task.id}"
+                                    style="left: ${leftPos}px; width: ${width}px; top: 0; height: 100%; background: ${task.status === '完了' ? 'var(--success)' : task.status === '進行中' ? 'var(--warning)' : 'var(--primary)'};"
+                                    onmousedown="startGanttDrag(event, ${task.id})">
+                                    <div class="gantt-bar-resize-left" onmousedown="startGanttResize(event, ${task.id}, 'left')"></div>
+                                    ${task.name}
+                                    <div class="gantt-bar-resize-right" onmousedown="startGanttResize(event, ${task.id}, 'right')"></div>
+                                </div>
+                            ` : ''}
+                            
+                            ${todayIndex >= 0 ? `
+                                <div class="gantt-today-line" style="left: ${todayIndex * DAY_WIDTH + (DAY_WIDTH / 2)}px;"></div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 最終的なHTML構造の構築
+            container.innerHTML = `
+                <div class="gantt-scroll-wrapper" id="ganttScrollWrapper">
+                    <div class="gantt-header-fixed" style="width: ${TASK_COL_WIDTH + totalDays * DAY_WIDTH}px;">
+                        <div class="gantt-timeline-wrapper">
+                            <div class="gantt-task-names" style="width: ${TASK_COL_WIDTH}px;">
+                                <div style="padding: 10px; font-weight: 700; font-size: 16px; text-align: center;">タスク名</div>
+                            </div>
+                            <div class="gantt-timeline-container">
+                                <div class="gantt-year-header">${yearHeaderHtml}</div>
+                                <div class="gantt-month-header">${monthHeaderHtml}</div>
+                                <div class="gantt-day-header">${dayHeaderHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gantt-body" style="width: ${TASK_COL_WIDTH + totalDays * DAY_WIDTH}px;">
+                        ${taskRowsHtml}
+                    </div>
+                </div>
+                <div class="card-header" style="margin-top: 16px;">
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="zoomOut()">ズームアウト (-)</button>
+                        <input type="text" id="zoomInput" style="width: 60px; text-align: center; border: 1px solid var(--border); border-radius: 8px; padding: 4px;" onchange="setZoomByInput(this.value)">
+                        <button class="btn btn-secondary" onclick="zoomIn()">ズームイン (+)</button>
+                        <button class="btn btn-secondary" onclick="resetZoom()">リセット</button>
+                    </div>
+                    <button class="btn btn-secondary" onclick="printGantt()">🖨️ 印刷</button>
+                </div>
+            `;
+
+            updateZoomDisplay();
+
+            // Today Lineを中央にスクロール
+            if (todayIndex >= 0) {
+                document.getElementById('ganttScrollWrapper').scrollLeft = todayIndex * DAY_WIDTH - (container.clientWidth / 2) + (TASK_COL_WIDTH / 2);
+            }
+        }
+        
+        // ====================================
+        // 1. ガントチャート→子、孫タスクの表示/非表示 (トグル機能)
+        // ====================================
+        function toggleGanttTask(taskId) {
+            const row = document.getElementById(`gantt-row-${taskId}`);
+            if (!row) return;
+
+            // 状態をトグル
+            const isExpanded = row.classList.contains('expanded');
+            
+            // トグル後の新しい状態
+            if (isExpanded) {
+                row.classList.remove('expanded');
+                ganttExpandedState[taskId] = false;
+            } else {
+                row.classList.add('expanded');
+                ganttExpandedState[taskId] = true;
+            }
+            
+            // 子孫タスクの表示/非表示を切り替える
+            const store = getCurrentStore();
+            const taskMap = store.tasks.reduce((map, t) => { map[t.id] = t; return map; }, {});
+
+            function getDescendantIds(parentId) {
+                let descendants = [];
+                // taskMapから親IDのタスク名を取得
+                const parentTaskName = taskMap[parentId] ? taskMap[parentId].name : null;
+                if (!parentTaskName) return descendants;
+                
+                // 子タスクを検索
+                const children = store.tasks.filter(t => t.parentName === parentTaskName);
+
+                for (const child of children) {
+                    descendants.push(child.id);
+                    descendants = descendants.concat(getDescendantIds(child.id));
+                }
+                return descendants;
+            }
+            
+            const descendants = getDescendantIds(taskId);
+
+            descendants.forEach(descendantId => {
+                const descRow = document.getElementById(`gantt-row-${descendantId}`);
+                if (descRow) {
+                    if (isExpanded) {
+                        // 親が閉じたら、子孫はすべて非表示
+                        descRow.classList.add('collapsed');
+                    } else {
+                        // 親が開いたら、祖先を遡り、一つでも閉じていなければ表示
+                        const descendantTask = taskMap[descendantId];
+                        let shouldBeVisible = true;
+                        
+                        let currentParentName = descendantTask.parentName;
+                        while (currentParentName) {
+                            const parentTask = store.tasks.find(t => t.name === currentParentName);
+                            if (parentTask) {
+                                // 親の展開状態を確認 (デフォルトは展開 true)
+                                const parentExpanded = ganttExpandedState[parentTask.id] === undefined ? true : ganttExpandedState[parentTask.id];
+                                if (!parentExpanded) {
+                                    shouldBeVisible = false;
+                                    break;
+                                }
+                                currentParentName = parentTask.parentName; // さらに祖先へ
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        if (shouldBeVisible) {
+                            descRow.classList.remove('collapsed');
+                        }
+                    }
+                }
+            });
+
+            // 展開状態を保存
+            localStorage.setItem('ganttExpandedState', JSON.stringify(ganttExpandedState));
+        }
+
+        // ガントバードラッグ開始
+        function startGanttDrag(e, id) {
+            if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+                alert('権限がありません。ガントバーの操作は管理者/編集者のみ可能です。');
+                return;
+            }
+            
+            e.preventDefault();
+            draggedTask = { id: id, startX: e.clientX };
+            const bar = document.querySelector(`[data-task-id="${id}"]`);
+            bar.classList.add('dragging');
+            document.addEventListener('mousemove', handleGanttDrag);
+            document.addEventListener('mouseup', endGanttDrag);
+        }
+
+        // ガントバードラッグ中
+        function handleGanttDrag(e) {
+            if (!draggedTask) return;
+            const bar = document.querySelector(`[data-task-id="${draggedTask.id}"]`);
+            if (!bar) return;
+
+            const deltaX = e.clientX - draggedTask.startX;
+            const daysDelta = Math.round(deltaX / DAY_WIDTH);
+            if (daysDelta === 0) return;
+
+            const currentLeft = parseInt(bar.style.left) || 0;
+            const newLeft = currentLeft + (daysDelta * DAY_WIDTH);
+
+            if (newLeft >= 0) {
+                bar.style.left = newLeft + 'px';
+                draggedTask.startX = e.clientX; 
+            }
+        }
+
+        // ガントバードラッグ終了
+        function endGanttDrag(e) {
+            if (!draggedTask) return;
+            const bar = document.querySelector(`[data-task-id="${draggedTask.id}"]`);
+            if (bar) {
+                bar.classList.remove('dragging');
+                const leftPos = parseInt(bar.style.left) || 0;
+                const dayOffset = Math.round(leftPos / DAY_WIDTH);
+                
+                const minDate = new Date(2025, 9, 1);
+                const newStartDate = new Date(minDate);
+                newStartDate.setDate(newStartDate.getDate() + dayOffset);
+
+                const store = getCurrentStore();
+                const task = store.tasks.find(t => t.id === draggedTask.id);
+                
+                if (task) {
+                    const duration = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
+                    
+                    const newEndDate = new Date(newStartDate);
+                    newEndDate.setDate(newEndDate.getDate() + duration);
+
+                    task.startDate = newStartDate.toISOString().split('T')[0];
+                    task.endDate = newEndDate.toISOString().split('T')[0];
+                    saveData();
+
+                    // カレンダーと連動してスクロール
+                    const scrollWrapper = document.getElementById('ganttScrollWrapper');
+                    if(scrollWrapper) {
+                        scrollWrapper.scrollLeft = leftPos - 300;
+                    }
+
+                    confetti({
+                        particleCount: 50,
+                        spread: 50,
+                        origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }
+                    });
+                    
+                    renderAll(); // 全体を再レンダリングして反映
+                }
+            }
+            draggedTask = null;
+            document.removeEventListener('mousemove', handleGanttDrag);
+            document.removeEventListener('mouseup', endGanttDrag);
+        }
+
+        // ガントバーリサイズ開始
+        function startGanttResize(e, id, side) {
+            if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+                alert('権限がありません。ガントバーの操作は管理者/編集者のみ可能です。');
+                return;
+            }
+            
+            e.preventDefault();
+            e.stopPropagation(); // ドラッグと競合しないように
+
+            const bar = document.querySelector(`[data-task-id="${id}"]`);
+            if (!bar) return;
+
+            resizingTask = {
+                id: id,
+                side: side,
+                startX: e.clientX,
+                initialLeft: parseInt(bar.style.left) || 0,
+                initialWidth: parseInt(bar.style.width) || 0,
+                initialTask: getCurrentStore().tasks.find(t => t.id === id) 
+            };
+            
+            bar.classList.add('dragging');
+            document.addEventListener('mousemove', handleGanttResize);
+            document.addEventListener('mouseup', endGanttResize);
+        }
+
+        // ガントバーリサイズ中
+        function handleGanttResize(e) {
+            if (!resizingTask) return;
+            const bar = document.querySelector(`[data-task-id="${resizingTask.id}"]`);
+            if (!bar) return;
+
+            const deltaX = e.clientX - resizingTask.startX;
+
+            if (resizingTask.side === 'left') {
+                const newLeft = resizingTask.initialLeft + deltaX;
+                const newWidth = resizingTask.initialWidth - deltaX;
+                if (newWidth >= DAY_WIDTH) {
+                    bar.style.left = newLeft + 'px';
+                    bar.style.width = newWidth + 'px';
+                }
+            } else if (resizingTask.side === 'right') {
+                const newWidth = resizingTask.initialWidth + deltaX;
+                if (newWidth >= DAY_WIDTH) {
+                    bar.style.width = newWidth + 'px';
+                }
+            }
+        }
+
+        // ガントバーリサイズ終了
+        function endGanttResize(e) {
+            if (!resizingTask) return;
+            const bar = document.querySelector(`[data-task-id="${resizingTask.id}"]`);
+            if (bar) {
+                bar.classList.remove('dragging');
+                
+                const minDate = new Date(2025, 9, 1);
+                const currentLeft = parseInt(bar.style.left) || 0;
+                const currentWidth = parseInt(bar.style.width) || 0;
+
+                const startDayOffset = Math.round(currentLeft / DAY_WIDTH);
+                const duration = Math.max(1, Math.round(currentWidth / DAY_WIDTH)); 
+
+                const newStartDate = new Date(minDate);
+                newStartDate.setDate(newStartDate.getDate() + startDayOffset);
+                
+                const newEndDate = new Date(newStartDate);
+                newEndDate.setDate(newEndDate.getDate() + duration - 1);
+
+                const store = getCurrentStore();
+                const task = store.tasks.find(t => t.id === resizingTask.id);
+                
+                if (task) {
+                    task.startDate = newStartDate.toISOString().split('T')[0];
+                    task.endDate = newEndDate.toISOString().split('T')[0];
+                    saveData();
+                    renderAll(); // 全体を再レンダリングして反映
+                }
+            }
+
+            resizingTask = null;
+            document.removeEventListener('mousemove', handleGanttResize);
+            document.removeEventListener('mouseup', endGanttResize);
+        }
+
+        // ガントチャート印刷
+        function printGantt() {
+            // 印刷前にズームをリセット
+            const originalDayWidth = DAY_WIDTH;
+            const originalTaskColWidth = TASK_COL_WIDTH;
+            resetZoom(); 
+            
+            // スクロールを一時的に停止
+            const scrollWrapper = document.getElementById('ganttScrollWrapper');
+            const originalOverflow = scrollWrapper.style.overflow;
+            scrollWrapper.style.overflow = 'visible';
+
+            window.print();
+            
+            // 元の状態に戻す
+            DAY_WIDTH = originalDayWidth;
+            TASK_COL_WIDTH = originalTaskColWidth;
+            renderGanttChart(); // 再描画してズームレベルを戻す
+            scrollWrapper.style.overflow = originalOverflow;
+        }
+
+        // ガントチャート ズーム機能
+        function zoomIn() {
+            if (DAY_WIDTH < 60) {
+                DAY_WIDTH += 3;
+                TASK_COL_WIDTH = Math.max(120, Math.round(DAY_WIDTH * 8)); // 最小120px確保
+                renderGanttChart();
+                updateZoomDisplay();
+            }
+        }
+
+        function zoomOut() {
+            if (DAY_WIDTH > 2) {
+                DAY_WIDTH -= 3;
+                TASK_COL_WIDTH = Math.max(120, Math.round(DAY_WIDTH * 8)); // 最小120px確保
+                renderGanttChart();
+                updateZoomDisplay();
+            }
+        }
+
+        function resetZoom() {
+            DAY_WIDTH = 30;
+            TASK_COL_WIDTH = 240;
+            renderGanttChart();
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            const percentage = Math.round((DAY_WIDTH / 30) * 100);
+            const input = document.getElementById('zoomInput');
+            if (input) {
+                input.value = percentage;
+            }
+        }
+
+        function setZoomByInput(value) {
+            let percentage = parseInt(value) || 100;
+            percentage = Math.max(7, Math.min(200, percentage));
+            DAY_WIDTH = Math.round((percentage / 100) * 30);
+            DAY_WIDTH = Math.max(2, Math.min(60, DAY_WIDTH));
+            TASK_COL_WIDTH = Math.max(120, Math.round(DAY_WIDTH * 8));
+            renderGanttChart();
+            updateZoomDisplay();
+        }
+
+        // カレンダー描画
+        function renderCalendar() {
+            const container = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarTitle');
+            const store = getCurrentStore();
+            const today = new Date();
+
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth(); // 0-11
+            const date = currentMonth.getDate();
+
+            title.textContent = `${year}年 ${month + 1}月`;
+
+            // その月の最初の日の曜日 (0=日, 6=土)
+            const firstDayOfMonth = new Date(year, month, 1);
+            const startDay = firstDayOfMonth.getDay(); 
+            
+            // その月の日数
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let html = '';
+
+            // 前月の日付 (隙間埋め)
+            const daysInPreviousMonth = new Date(year, month, 0).getDate();
+            for (let i = startDay; i > 0; i--) {
+                const day = daysInPreviousMonth - i + 1;
+                html += `<div class="calendar-day other-month"><div class="calendar-day-number">${day}</div></div>`;
+            }
+
+            // 今月の日付
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDate = new Date(year, month, day);
+                const isToday = currentDate.toDateString() === today.toDateString();
+                
+                const dayTasks = store.tasks.filter(task => {
+                    const start = new Date(task.startDate);
+                    const end = new Date(task.endDate);
+                    // 時刻情報をクリアして比較
+                    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+                    const taskStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                    const taskEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+                    return date >= taskStart && date <= taskEnd;
+                }).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                
+                html += `
+                    <div class="calendar-day ${isToday ? 'today' : ''}">
+                        <div class="calendar-day-number">${day}</div>
+                        ${dayTasks.slice(0, 3).map(task => `<div class="calendar-task">${task.name}</div>`
+                        ).join('')}
+                        ${dayTasks.length > 3 ? `<div style="font-size: 11px; color: var(--text-secondary); padding: 2px;">+${dayTasks.length - 3}件</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // 次月の日付 (隙間埋め)
+            const totalCells = startDay + daysInMonth;
+            const remainingDays = 42 - totalCells; // 6週間表示で42マス
+
+            for (let day = 1; day <= remainingDays; day++) {
+                html += `<div class="calendar-day other-month"><div class="calendar-day-number">${day}</div></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function previousMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function todayMonth() {
+            currentMonth = new Date();
+            renderCalendar();
+        }
+
+        // タイムライン描画
+        function renderTimeline() {
+            const container = document.getElementById('timelineView');
+            const store = getCurrentStore();
+            if (store.tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏱️</div><div class="empty-state-text">タスクがありません</div></div>';
+                return;
+            }
+
+            const sortedTasks = [...store.tasks].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+            const getStatusClass = (status) => {
+                if (status === '完了') return 'completed';
+                if (status === '進行中') return 'in-progress';
+                return 'pending';
+            };
+
+            container.innerHTML = sortedTasks.map(task => {
+                return `
+                    <div class="task-item level-${task.level}">
+                        <div class="task-header">
+                            <div class="task-name">${task.name}</div>
+                            <span class="task-status ${getStatusClass(task.status)}">${task.status}</span>
+                        </div>
+                        <div class="task-meta">
+                            ${task.parentName ? `<span>📂 ${task.parentName}</span>` : ''}
+                            ${task.assignee ? `<span class="task-assignee">${task.assignee}</span>` : ''}
+                            <span>📅 ${task.startDate} 〜 ${task.endDate}</span>
+                        </div>
+                        ${task.memo ? `<div class="task-memo">${task.memo}</div>` : ''}
+                        <div class="task-actions">
+                            <button class="btn-edit" onclick="editTask(${task.id})">✏️ 編集</button>
+                            <button class="btn-delete" onclick="deleteTask(${task.id})">🗑️ 削除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // スタッフリスト描画
+        function renderStaffList() {
+            const container = document.getElementById('staffList');
+            const store = getCurrentStore();
+            if (store.staff.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">スタッフが登録されていません</div></div>';
+                return;
+            }
+
+            container.innerHTML = store.staff.map(staff => `
+                <div class="staff-card">
+                    <div class="staff-name">${staff.name}</div>
+                    <div class="staff-role">${staff.role}</div>
+                    <div class="staff-info">☎️ ${staff.phone || '未登録'}</div>
+                    <div class="staff-info">📧 ${staff.email || '未登録'}</div>
+                    <div class="staff-info">🗓️ 入社: ${staff.joinDate || '未登録'}</div>
+                    <div class="task-actions" style="margin-top: 16px;">
+                        <button class="btn-edit" onclick="editStaff(${staff.id})">✏️ 編集</button>
+                        <button class="btn-delete" onclick="deleteStaff(${staff.id})">🗑️ 削除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // スタッフ追加/更新モーダル
+        function openStaffModal() {
+            if (currentUser.role !== 'admin') {
+                alert('権限がありません。スタッフの追加・編集は管理者のみ可能です。');
+                return;
+            }
+            document.getElementById('staffId').value = '';
+            document.getElementById('staffForm').reset();
+            document.getElementById('staffModal').classList.add('active');
+        }
+
+        function closeStaffModal() {
+            document.getElementById('staffModal').classList.remove('active');
+        }
+
+        function addOrUpdateStaff(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('staffId').value;
+            const name = document.getElementById('staffName').value.trim();
+            const role = document.getElementById('staffRole').value;
+            const phone = document.getElementById('staffPhone').value.trim();
+            const email = document.getElementById('staffEmail').value.trim();
+            const joinDate = document.getElementById('staffJoinDate').value;
+            
+            const store = getCurrentStore();
+
+            if (id) {
+                // 更新
+                const staff = store.staff.find(s => s.id == id);
+                if (staff) {
+                    staff.name = name;
+                    staff.role = role;
+                    staff.phone = phone;
+                    staff.email = email;
+                    staff.joinDate = joinDate;
+                    alert('✅ スタッフ情報を更新しました！');
+                }
+            } else {
+                // 新規追加
+                const newId = store.staff.length > 0 ? Math.max(...store.staff.map(s => s.id)) + 1 : 101;
+                store.staff.push({ id: newId, name, role, phone, email, joinDate });
+                alert('✅ スタッフを追加しました！');
+            }
+
+            saveData();
+            closeStaffModal();
+            renderStaffList();
+        }
+
+        function editStaff(id) {
+            if (currentUser.role !== 'admin') {
+                alert('権限がありません。スタッフの追加・編集は管理者のみ可能です。');
+                return;
+            }
+            
+            const store = getCurrentStore();
+            const staff = store.staff.find(s => s.id === id);
+            if (!staff) return;
+
+            document.getElementById('staffId').value = staff.id;
+            document.getElementById('staffName').value = staff.name;
+            document.getElementById('staffRole').value = staff.role;
+            document.getElementById('staffPhone').value = staff.phone;
+            document.getElementById('staffEmail').value = staff.email;
+            document.getElementById('staffJoinDate').value = staff.joinDate;
+
+            openStaffModal();
+        }
+
+        function deleteStaff(id) {
+            if (currentUser.role !== 'admin') {
+                alert('権限がありません。スタッフの削除は管理者のみ可能です。');
+                return;
+            }
+            
+            if (confirm('このスタッフを削除しますか？')) {
+                const store = getCurrentStore();
+                store.staff = store.staff.filter(s => s.id !== id);
+                saveData();
+                renderStaffList();
+                alert('✅ スタッフを削除しました。');
+            }
+        }
+        
+        // ダッシュボード統計
+        function renderDashboard() {
+            const store = getCurrentStore();
+            const tasks = store.tasks;
+            if (tasks.length === 0) {
+                document.getElementById('totalTasks').textContent = '0';
+                document.getElementById('completedTasks').textContent = '0';
+                document.getElementById('inProgressTasks').textContent = '0';
+                document.getElementById('progressPercent').textContent = '0%';
+                document.getElementById('dashboardStats').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">タスクがありません</div></div>';
+                return;
+            }
+
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.status === '完了').length;
+            const inProgress = tasks.filter(t => t.status === '進行中').length;
+            const notStarted = tasks.filter(t => t.status === '未着手').length;
+            const progress = Math.round((completed / total) * 100);
+
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('inProgressTasks').textContent = inProgress;
+            document.getElementById('progressPercent').textContent = progress + '%';
+
+            // レベル別集計
+            const byLevel = {};
+            tasks.forEach(task => {
+                byLevel[task.level] = (byLevel[task.level] || 0) + 1;
+            });
+
+            document.getElementById('dashboardStats').innerHTML = `
+                <div style="background: var(--background); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                    <div style="font-weight: 600; margin-bottom: 12px;">全体進捗率</div>
+                    <div style="background: white; height: 40px; border-radius: 20px; overflow: hidden;">
+                        <div style="height: 100%; background: linear-gradient(135deg, #007AFF, #5856D6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; transition: width 0.5s ease; width: ${progress}%;">
+                            ${progress}%
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 16px;">階層別タスク数</div>
+                    ${Object.entries(byLevel).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).map(([level, count]) => `
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border);">
+                            <span>レベル ${level}</span>
+                            <span style="font-weight: 700;">${count} 件</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // マイルストーン
+            const milestones = tasks.filter(t => t.memo && t.memo.includes('重要タスク')).sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+            const milestonesContainer = document.getElementById('milestones');
+
+            if (milestones.length > 0) {
+                 milestonesContainer.innerHTML = milestones.map(task => `
+                    <div style="background: #FFF3E0; border-left: 6px solid var(--warning); padding: 16px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">${task.name}</div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">📂 ${task.parentName || 'なし'} | 👤 ${task.assignee}</div>
+                        </div>
+                        <div style="flex-shrink: 0; text-align: right;">
+                            <div style="font-weight: 700; color: var(--danger);">${task.endDate} 期限</div>
+                            <span class="task-status ${getStatusClass(task.status)}" style="margin-top: 4px; display: inline-block;">${task.status}</span>
+                        </div>
+                    </div>
+                 `).join('');
+            } else {
+                 milestonesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎉</div>
+                        <div class="empty-state-text">重要なタスクをマークしましょう</div>
+                    </div>
+                 `;
+            }
+        }
+
+        // CSVインポート
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            if (lines.length <= 1) {
+                alert('CSVファイルにタスクデータが見つかりません。');
+                return;
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const requiredHeaders = ['level', 'parentName', 'name', 'assignee', 'memo', 'startDate', 'endDate', 'status'];
+            
+            const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+            if (missingHeaders.length > 0) {
+                alert(`CSVヘッダーが不足しています: ${missingHeaders.join(', ')}`);
+                return;
+            }
+
+            const store = getCurrentStore();
+            let newId = store.tasks.length > 0 ? Math.max(...store.tasks.map(t => t.id)) + 1 : 1;
+            let importCount = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) continue;
+
+                const taskData = {};
+                headers.forEach((header, index) => {
+                    taskData[header] = values[index];
+                });
+
+                if (taskData.name && taskData.startDate && taskData.endDate) {
+                    const newTask = {
+                        id: newId++,
+                        level: parseInt(taskData.level) || 1,
+                        parentName: taskData.parentName || null,
+                        name: taskData.name,
+                        assignee: taskData.assignee || '',
+                        memo: taskData.memo || '',
+                        startDate: taskData.startDate,
+                        endDate: taskData.endDate,
+                        status: ['未着手', '進行中', '完了'].includes(taskData.status) ? taskData.status : '未着手'
+                    };
+                    store.tasks.push(newTask);
+                    importCount++;
+                }
+            }
+
+            saveData();
+            renderAll();
+            alert(`✅ ${importCount}件のタスクをインポートしました！`);
+        }
+
+        function setupFileImport() {
+            const fileInput = document.getElementById('csvFile');
+            const importZone = document.getElementById('importZone');
+
+            // ファイル選択
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        parseCSV(content);
+                    } catch (error) {
+                        alert('CSVの読み込みに失敗しました: ' + error.message);
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
+            
+            // ドラッグ&ドロップ
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                importZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                importZone.addEventListener(eventName, () => importZone.classList.add('dragover'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                importZone.addEventListener(eventName, () => importZone.classList.remove('dragover'), false);
+            });
+
+            importZone.addEventListener('drop', function(e) {
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            parseCSV(e.target.result);
+                        } catch (error) {
+                            alert('CSVの読み込みに失敗しました: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file, 'UTF-8');
+                }
+            }, false);
+        }
+        
+        // 全データのエクスポート
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stores));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "istyle_dashboard_data.json");
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // 全データ削除（パスワード保護）
+        function deleteAllData() {
+            if (currentUser.role !== 'admin') {
+                alert('権限がありません。データの削除は管理者のみ可能です。');
+                return;
+            }
+            
+            const password = prompt('本当に全データを削除しますか？\nパスワードを入力してください:');
+            if (password !== DELETE_PASSWORD) {
+                if (password !== null) {
+                    alert('❌ パスワードが間違っています。');
+                }
+                return;
+            }
+            if (confirm('本当に全データを削除しますか？この操作は取り消せません。')) {
+                stores = {
+                    default: { name: 'デフォルト店舗', tasks: [], staff: [] }
+                };
+                currentStore = 'default';
+                saveData();
+                initializeStoreSelector();
+                renderAll();
+                alert('✅ 全データを削除しました。');
+            }
+        }
+
+        // すべてをレンダリング
+        function renderAll() {
+            renderDashboard();
+            renderTaskList();
+            renderGanttChart();
+            renderStaffList();
+            renderCalendar();
+            renderTimeline();
+        }
+        
+        // ログイン処理
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('istyle_currentUser', JSON.stringify(user));
+                showApp();
+            } else {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.textContent = 'メールアドレスまたはパスワードが正しくありません';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // アプリ表示
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            
+            // ユーザー情報を表示
+            document.getElementById('currentUserName').textContent = currentUser.name;
+            document.getElementById('currentUserRole').textContent = currentUser.role === 'admin' ? '管理者' : '編集者';
+
+            // 管理者のみユーザー管理を表示
+            if (currentUser.role === 'admin') {
+                document.getElementById('userManagement').style.display = 'block';
+                renderUserList();
+            } else {
+                 document.getElementById('userManagement').style.display = 'none';
+            }
+            
+            renderAll();
+        }
+
+        // ログアウト
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                localStorage.removeItem('istyle_currentUser');
+                currentUser = null;
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+        }
+
+        // ユーザーリスト描画
+        function renderUserList() {
+            if (currentUser.role !== 'admin') return;
+            const container = document.getElementById('userList');
+            let html = '';
+
+            users.forEach(user => {
+                if (user.id === currentUser.id) return;
+
+                html += `
+                    <div style="padding: 16px; background: #F5F5F7; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 4px;">${user.name}</div>
+                            <div style="font-size: 14px; color: #86868B;">${user.email}</div>
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-top: 8px; ${user.role === 'admin' ? 'background: rgba(0, 122, 255, 0.1); color: #007AFF;' : 'background: rgba(88, 86, 214, 0.1); color: #5856D6;'}"">${user.role === 'admin' ? '管理者' : '編集者'}</span>
+                        </div>
+                        <button class="btn btn-danger" onclick="deleteUser(${user.id})">削除</button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ユーザー追加モーダル
+        function openUserModal() {
+            if (currentUser.role !== 'admin') return;
+            document.getElementById('userForm').reset();
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        function addUser(event) {
+            event.preventDefault();
+            if (currentUser.role !== 'admin') return;
+            
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+
+            if (users.some(u => u.email === email)) {
+                alert('このメールアドレスは既に登録されています。');
+                return;
+            }
+
+            const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+            users.push({ id: newId, name, email, password, role });
+            saveData();
+            renderUserList();
+            closeUserModal();
+            alert('✅ ユーザーを追加しました！');
+        }
+
+        // ユーザー削除
+        function deleteUser(userId) {
+            if (currentUser.role !== 'admin') return;
+            
+            if (!confirm('このユーザーを削除しますか？')) return;
+            
+            users = users.filter(u => u.id !== userId);
+            saveData();
+            renderUserList();
+        }
+
+        // ログインチェック
+        function checkLogin() {
+            const savedUser = localStorage.getItem('istyle_currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+            }
+        }
+
+        // サイドバー開閉 (モバイル)
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // リサイザー機能
+        function setupResizers() {
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarResizer = document.getElementById('sidebarResizer');
+            const contentHeader = document.querySelector('.content-header');
+            const headerResizer = document.getElementById('headerResizer');
+            let isResizingSidebar = false;
+            let isResizingHeader = false;
+            let startX = 0;
+            let startY = 0;
+            let startWidth = 0;
+            let startHeight = 0;
+
+            // サイドバーリサイザー
+            if (sidebarResizer) {
+                sidebarResizer.addEventListener('mousedown', (e) => {
+                    isResizingSidebar = true;
+                    startX = e.clientX;
+                    startWidth = parseInt(getComputedStyle(sidebar).width, 10);
+                    document.body.style.cursor = 'ew-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+            }
+
+            // ヘッダーリサイザー
+            if (headerResizer) {
+                headerResizer.addEventListener('mousedown', (e) => {
+                    isResizingHeader = true;
+                    startY = e.clientY;
+                    startHeight = parseInt(getComputedStyle(contentHeader).height, 10);
+                    document.body.style.cursor = 'ns-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+            }
+
+            // マウス移動
+            document.addEventListener('mousemove', (e) => {
+                if (isResizingSidebar) {
+                    const width = startWidth + (e.clientX - startX);
+                    if (width >= 200 && width <= 500) {
+                        sidebar.style.width = width + 'px';
+                        TASK_COL_WIDTH = width; // ガントチャートのタスク名列幅と連動
+                        renderGanttChart();
+                    }
+                } else if (isResizingHeader) {
+                    const height = startHeight + (e.clientY - startY);
+                    if (height >= 0 && height <= 150) {
+                        // パディングを調整して高さを変える
+                        contentHeader.style.padding = Math.max(0, height / 5) + 'px 24px ' + Math.max(0, height / 5) + 'px 24px';
+                    }
+                }
+            });
+
+            // マウスアップ
+            document.addEventListener('mouseup', () => {
+                isResizingSidebar = false;
+                isResizingHeader = false;
+                document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'auto';
+            });
+        }
+
+
+        // 初期処理
+        window.onload = function() {
+            loadData();
+            initializeStoreSelector();
+            setupFileImport();
+            setupResizers();
+            checkLogin();
+        };
+
+    </script>
+</body>
+</html>
