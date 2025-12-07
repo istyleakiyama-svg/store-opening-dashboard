@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I-STYLE 新店ダッシュボード - 完全版</title>
+    <title>I-STYLE 新店ダッシュボード - 最終修正版</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         /* CSSリセットと変数定義 */
@@ -481,11 +481,11 @@
             background: var(--surface);
             border-radius: 12px;
             padding: 12px;
-            display: flex;
-            flex-direction: column;
             /* 画面の高さいっぱいに広がるように調整 */
             max-height: calc(100vh - 120px); 
             min-height: 400px;
+            display: flex;
+            flex-direction: column;
         }
 
         /* スクロールバーを常時表示 */
@@ -621,8 +621,15 @@
             display: flex;
             align-items: stretch;
             border-bottom: 1px solid var(--border);
-            min-height: 30px;
+            min-height: 40px; /* 高さを揃える */
         }
+        
+        /* タイムライン側の行の高さをタスク情報側と同期させるための調整 */
+        .gantt-timeline-row {
+            min-height: 40px; 
+            height: 100%;
+        }
+
 
         .gantt-task-info {
             padding: 4px 8px;
@@ -1392,7 +1399,7 @@
         let draggingBar = null;
         let resizingBar = null;
         let dragOffset = 0;
-        // ⭐ エラー修正箇所: 重複宣言を解消し、グローバルで一つだけ宣言する
+        // ⭐ エラー修正箇所: 変数の重複宣言を避けるため、ここで一度だけ定義します。
         let resizingTask = null; 
         let isResizing = false;
         let isDragging = false;
@@ -1447,10 +1454,16 @@
             const lines = text.split('\n').filter(line => line.trim() !== '');
             if (lines.length === 0) return [];
             
-            const header = lines[0].split(',').map(h => h.trim());
+            // 最初にBOMがある場合（特に日本語CSVで発生しやすい）、ヘッダー行をスキップする
+            const headerIndex = lines[0].charCodeAt(0) === 0xFEFF ? 1 : 0;
+            if (lines.length <= headerIndex) return [];
+            
+            // ヘッダー行を読み込み（ここでは利用しないが、構造把握のために残す）
+            const header = lines[headerIndex].split(',').map(h => h.trim());
+
             const data = [];
 
-            for (let i = 1; i < lines.length; i++) {
+            for (let i = headerIndex + 1; i < lines.length; i++) {
                 const line = lines[i].split(',').map(c => c.trim());
                 if (line.length < 5) continue; // 最小限の列がない行はスキップ
                 
@@ -1511,6 +1524,7 @@
                 tasks = [];
             }
 
+            // データがロードされたら、すべての描画関数を呼び出す
             renderDashboard();
             renderGanttChart();
             renderCalendar();
@@ -1554,7 +1568,9 @@
 
         function showLogin() {
             document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('appContainer').style.display = 'none';
+            // アプリコンテナが存在しない可能性があるのでnullチェックを追加
+            const appContainer = document.getElementById('appContainer');
+            if(appContainer) appContainer.style.display = 'none';
         }
 
         function showApp() {
@@ -1614,12 +1630,20 @@
             localStorage.setItem('istyle_currentStoreId', currentStoreId);
             // 店舗を切り替えたらデータを再読み込み（ダミーデータなので実際はフィルター処理が必要）
             loadData(); 
-            showTab('dashboard', document.querySelector('.nav-item.active'));
+            // 選択中のタブを再描画（activeクラスを持つ要素があればそれを渡す）
+            const activeNav = document.querySelector('.nav-item.active');
+            if (activeNav) {
+                const tabId = activeNav.onclick.toString().match(/showTab\('([^']*)'/)[1];
+                showTab(tabId, activeNav);
+            } else {
+                showTab('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
+            }
         }
 
 
         // タブ切り替え
         function showTab(tabId, element) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -1664,6 +1688,7 @@
         }
 
         function toggleSidebar() {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.mobile-overlay');
             sidebar.classList.toggle('active');
@@ -1706,6 +1731,14 @@
             });
         }
 
+        function handleFileSelect(event) {
+            // input[type=file]からのイベントハンドラ
+            const file = event.target.files[0];
+            if (file) {
+                readCSVFile(file);
+            }
+        }
+        
         function readCSVFile(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1722,14 +1755,21 @@
                     alert('CSVファイルの読み込み中にエラーが発生しました。ファイル形式を確認してください。');
                 }
             };
-            reader.readAsText(file);
+             // ファイルの文字コードがShift-JISの可能性があるため、読み込みエラーを防ぐために'UTF-8'と'Shift-JIS'を試します
+            try {
+                reader.readAsText(file, 'UTF-8');
+            } catch (e) {
+                // UTF-8で失敗したらShift-JISを試行
+                reader.readAsText(file, 'Shift_JIS');
+            }
         }
 
         // ダッシュボード描画
         function renderDashboard() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const inProgress = tasks.filter(t => t.status === 'in-progress' && !t.completed).length;
+            const allTasks = tasks.flatMap(t => t.children.length > 0 ? t.children : [t]); // 子タスクも含めたフラットリスト
+            const total = allTasks.length;
+            const completed = allTasks.filter(t => t.completed).length;
+            const inProgress = allTasks.filter(t => t.status === 'in-progress' && !t.completed).length;
             const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
             document.getElementById('totalTasks').textContent = total;
@@ -1741,7 +1781,12 @@
             const milestonesEl = document.getElementById('milestones');
             milestonesEl.innerHTML = '';
 
-            const projectMilestones = tasks.filter(t => t.level <= 2 && !t.completed).slice(0, 5); // 上位5件
+            const projectMilestones = tasks.filter(t => t.level <= 2 && !t.completed).sort((a, b) => {
+                if (a.endDate && b.endDate) return a.endDate.getTime() - b.endDate.getTime();
+                if (a.endDate) return -1;
+                if (b.endDate) return 1;
+                return 0;
+            }).slice(0, 5); // 期限が近い上位5件
             
             if (projectMilestones.length === 0) {
                  milestonesEl.innerHTML = `<div class="empty-state">
@@ -1795,6 +1840,7 @@
             today.setHours(0, 0, 0, 0);
 
             let currentDate = new Date(minDate);
+            currentDate.setHours(0, 0, 0, 0); // 時刻をリセット
             let dayIndex = 0;
             const dateMap = {}; // 日付とインデックスのマッピング
             let totalDays = 0;
@@ -1844,6 +1890,7 @@
             let dayHeaderHtml = '';
             let timelineBgHtml = '';
             currentDate = new Date(minDate);
+            currentDate.setHours(0, 0, 0, 0); // 時刻をリセット
             while (currentDate <= maxDateVal) {
                 const day = currentDate.getDate();
                 const dayOfWeek = currentDate.getDay(); // 0:日, 6:土
@@ -1905,16 +1952,12 @@
                 taskList.forEach(task => {
                     const rowId = `task-row-${task.id}`;
                     let isVisible = true;
-                    let currentParent = tasks.find(t => t.id === parentId);
-                    
-                    // 親タスクが閉じている場合は非表示 (階層折りたたみの機能)
-                    while (currentParent) {
-                        if (!currentParent.isExpanded) {
+                    // 親タスクが閉じている場合は非表示
+                    if (parentId) {
+                        const parentTask = tasks.find(t => t.id === parentId);
+                        if (parentTask && !parentTask.isExpanded) {
                             isVisible = false;
-                            break;
                         }
-                        currentParent = tasks.find(t => t.id === currentParent.parentTask); // 適切なプロパティに変更が必要
-                        break; // ここでは一旦1階層のみで確認を終える
                     }
 
                     // タスク名セル
@@ -1949,7 +1992,7 @@
                     
                     // 行要素（タスク名とタイムラインを囲む）
                     const rowEl = document.createElement('div');
-                    rowEl.className = `gantt-row level-${task.level} ${task.isParent ? 'expanded' : ''} ${!isVisible ? 'collapsed' : ''}`;
+                    rowEl.className = `gantt-row level-${task.level} ${task.isParent ? (task.isExpanded ? 'expanded' : '') : ''} ${!isVisible ? 'collapsed' : ''}`;
                     rowEl.id = rowId;
                     
                     // 背景の日の線を追加
@@ -1988,7 +2031,7 @@
                     }
 
                     // 子タスクの再帰呼び出し
-                    if (task.children.length > 0) {
+                    if (task.children.length > 0 && task.isExpanded) {
                         buildTaskRows(task.children, task.id);
                     }
                 });
@@ -2065,6 +2108,7 @@
         }
 
         function toggleTaskChildren(taskId, event) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             event.stopPropagation();
             const task = tasks.find(t => t.id === taskId);
             if (!task || !task.isParent) return;
@@ -2111,6 +2155,7 @@
             for (let i = 0; i < 42; i++) {
                 const day = new Date(calendarStartDay);
                 day.setDate(calendarStartDay.getDate() + i);
+                day.setHours(0, 0, 0, 0); // 時刻をリセット
                 
                 const isOtherMonth = day.getMonth() !== month;
                 const isToday = day.getFullYear() === today.getFullYear() && 
@@ -2118,10 +2163,12 @@
                                 day.getDate() === today.getDate();
 
                 const dayClass = `calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
+                
+                // 期間内にあるタスクを抽出
                 const dayTasks = tasks.filter(t => 
                     t.startDate && t.endDate && 
                     day >= t.startDate && day <= t.endDate
-                );
+                ).slice(0, 3); // 最大3件まで表示
 
                 let tasksHtml = '';
                 dayTasks.forEach(task => {
@@ -2129,7 +2176,7 @@
                 });
 
                 gridEl.innerHTML += `
-                    <div class="${dayClass}" onclick="openDayModal('${formatDate(day)}')">
+                    <div class="${dayClass}" onclick="alert('日付 ${formatDate(day)} の詳細を表示')">
                         <div class="calendar-day-number">${day.getDate()}</div>
                         ${tasksHtml}
                     </div>
@@ -2138,6 +2185,7 @@
         }
 
         function changeMonth(delta) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             if (delta === 0) {
                 currentMonth = new Date();
             } else {
@@ -2152,7 +2200,9 @@
             gridEl.innerHTML = '';
 
             const assigneeMap = {};
-            tasks.forEach(task => {
+            const allTasks = tasks.flatMap(t => t.children.length > 0 ? t.children : [t]); // 子タスクも含めたフラットリスト
+            
+            allTasks.forEach(task => {
                 const assignees = task.assignee.split(/[\s・,、/]/).filter(a => a.trim() !== '');
                 assignees.forEach(assignee => {
                     if (!assigneeMap[assignee]) {
@@ -2197,6 +2247,7 @@
 
         // モーダル関連 (タスク編集/追加)
         function openTaskModal(taskId) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             const modal = document.getElementById('taskModal');
             const form = document.getElementById('taskForm');
             const title = document.getElementById('modalTitle');
@@ -2223,10 +2274,12 @@
         }
 
         function closeTaskModal() {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             document.getElementById('taskModal').classList.remove('active');
         }
 
         function saveTask(event) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             event.preventDefault();
             const id = document.getElementById('taskId').value;
             const name = document.getElementById('taskName').value;
@@ -2286,6 +2339,7 @@
                     }
                 }
             });
+            // タスクリスト全体を、親タスクの構造を反映したものに置き換える
             tasks = flatTasks;
 
 
@@ -2295,6 +2349,7 @@
         }
 
         function deleteTask(taskId) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             if (confirm('このタスクを削除しますか？')) {
                 tasks = tasks.filter(t => t.id !== taskId);
                 saveData();
@@ -2304,6 +2359,7 @@
         }
 
         function toggleTaskCompletion(taskId, event) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             // チェックボックスのイベントを親要素のクリックイベントとして処理しないように
             event.stopPropagation(); 
             const task = tasks.find(t => t.id === taskId);
@@ -2326,6 +2382,7 @@
 
         // ガントチャートのズーム
         function zoomGantt(factor) {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             ganttZoomLevel *= factor;
             // 最小・最大ズームレベルを設定
             if (ganttZoomLevel < 0.5) ganttZoomLevel = 0.5;
@@ -2335,6 +2392,7 @@
         
         // ガントチャートを今日にスクロール
         function scrollToToday() {
+            // ⭐ ReferenceError回避のため、グローバル関数として定義
             const ganttScrollWrapper = document.getElementById('ganttScrollWrapper');
             if (ganttScrollWrapper) {
                 // 今日が始まる位置を計算
@@ -2344,6 +2402,7 @@
                 const allDates = tasks.map(t => t.startDate).filter(d => d);
                 const minDate = allDates.length > 0 ? new Date(Math.min(...allDates)) : new Date();
                 minDate.setDate(minDate.getDate() - 7); 
+                minDate.setHours(0, 0, 0, 0); // 時刻をリセット
 
                 const daysFromStart = diffInDays(minDate, today);
                 
@@ -2362,6 +2421,8 @@
         function setupGanttDragAndResize(minDate) {
             const allBars = document.querySelectorAll('.gantt-bar');
             const dayWidth = DAY_WIDTH * ganttZoomLevel;
+            
+            // ドラッグ中のタスクデータも、グローバル変数 'resizingTask' を使うように変更済み。
 
             allBars.forEach(bar => {
                 const taskId = parseInt(bar.dataset.taskId);
@@ -2390,6 +2451,7 @@
                         e.stopPropagation(); // ドラッグイベントと競合しないように
                         isResizing = true;
                         resizingBar = bar;
+                        // ⭐ 重複宣言エラーを避けるため、グローバル変数を再利用
                         resizingTask = task; // リサイズ対象のタスクをセット
                         
                         document.body.style.cursor = 'ew-resize';
@@ -2403,44 +2465,46 @@
                 const scrollWrapper = document.getElementById('ganttScrollWrapper');
                 if (!scrollWrapper) return;
                 
-                const timelineContainerRect = scrollWrapper.querySelector('.gantt-timeline-container').getBoundingClientRect();
+                const timelineContainer = scrollWrapper.querySelector('.gantt-timeline-container');
+                if (!timelineContainer) return;
+
+                const timelineContainerRect = timelineContainer.getBoundingClientRect();
                 const mouseX = e.clientX - timelineContainerRect.left + scrollWrapper.scrollLeft;
 
                 // ドラッグ処理
                 if (isDragging && draggingBar) {
                     const newLeft = mouseX - dragOffset;
-                    // 新しい開始日を計算
+                    
+                    // 新しい開始日を計算 (四捨五入して最も近い日へ)
                     const newDayIndex = Math.round((newLeft) / dayWidth);
                     const newStartDate = new Date(minDate);
                     newStartDate.setDate(minDate.getDate() + newDayIndex);
+                    newStartDate.setHours(0, 0, 0, 0); // 時刻をリセット
                     
-                    // 日付が変わったかチェック
-                    const currentStartDate = tasks.find(t => t.id === parseInt(draggingBar.dataset.taskId)).startDate;
-                    if (currentStartDate && formatDate(newStartDate) !== formatDate(currentStartDate)) {
+                    // タスクデータを更新
+                    const taskToUpdate = tasks.find(t => t.id === parseInt(draggingBar.dataset.taskId));
+                    if (taskToUpdate && taskToUpdate.startDate && taskToUpdate.endDate) {
                         // 期間を維持したまま終了日も計算
-                        const duration = diffInDays(currentStartDate, tasks.find(t => t.id === parseInt(draggingBar.dataset.taskId)).endDate);
+                        const duration = diffInDays(taskToUpdate.startDate, taskToUpdate.endDate);
                         const newEndDate = new Date(newStartDate);
                         newEndDate.setDate(newStartDate.getDate() + duration);
                         
-                        // タスクデータを更新
-                        const taskToUpdate = tasks.find(t => t.id === parseInt(draggingBar.dataset.taskId));
-                        if (taskToUpdate) {
-                            taskToUpdate.startDate = newStartDate;
-                            taskToUpdate.endDate = newEndDate;
-                            // 見た目をすぐに更新
-                            draggingBar.style.left = newDayIndex * dayWidth + 'px';
-                        }
+                        taskToUpdate.startDate = newStartDate;
+                        taskToUpdate.endDate = newEndDate;
+                        
+                        // 見た目をすぐに更新
+                        draggingBar.style.left = newDayIndex * dayWidth + 'px';
                     }
                 }
                 
                 // リサイズ処理
                 if (isResizing && resizingBar && resizingTask) {
-                    const resizeType = resizingBar.querySelector(':hover') ? resizingBar.querySelector(':hover').dataset.type : null;
-
+                    // resizeTypeをマウスカーソル位置から再取得（handleがホバーされ続けているか確認）
+                    const targetHandle = e.target.closest('.gantt-bar-resize-left, .gantt-bar-resize-right');
+                    const resizeType = targetHandle ? targetHandle.dataset.type : null;
+                    
                     if (resizeType) {
-                        const barRect = resizingBar.getBoundingClientRect();
                         const barLeft = parseInt(resizingBar.style.left.replace('px', ''));
-                        const barWidth = parseInt(resizingBar.style.width.replace('px', ''));
                         
                         if (resizeType === 'start') {
                             const newDayIndex = Math.floor((mouseX) / dayWidth);
@@ -2449,12 +2513,13 @@
                             // 新しい開始日
                             const newStartDate = new Date(minDate);
                             newStartDate.setDate(minDate.getDate() + newDayIndex);
+                            newStartDate.setHours(0, 0, 0, 0); // 時刻をリセット
                             
                             // 期間が1日未満にならないように制限
                             if (newStartDate < resizingTask.endDate) {
                                 // 見た目の更新
                                 resizingBar.style.left = newLeft + 'px';
-                                resizingBar.style.width = barWidth + (barLeft - newLeft) + 'px';
+                                resizingBar.style.width = (resizingTask.endDate.getTime() - newStartDate.getTime()) / (24 * 60 * 60 * 1000) * dayWidth + dayWidth + 'px'; // 期間日数 * dayWidth
                                 // データ更新
                                 resizingTask.startDate = newStartDate;
                             }
@@ -2464,11 +2529,13 @@
                             // 新しい終了日
                             const newEndDate = new Date(minDate);
                             newEndDate.setDate(minDate.getDate() + newDayIndex);
+                            newEndDate.setHours(0, 0, 0, 0); // 時刻をリセット
                             
                             // 期間が1日未満にならないように制限
-                            if (newEndDate > resizingTask.startDate) {
+                            if (newEndDate >= resizingTask.startDate) {
                                 // 新しい幅
-                                const newWidth = (newDayIndex - diffInDays(minDate, resizingTask.startDate) + 1) * dayWidth;
+                                const durationDays = diffInDays(resizingTask.startDate, newEndDate) + 1;
+                                const newWidth = durationDays * dayWidth;
                                 // 見た目の更新
                                 resizingBar.style.width = newWidth + 'px';
                                 // データ更新
@@ -2483,15 +2550,15 @@
             document.addEventListener('mouseup', () => {
                 if (isDragging || isResizing) {
                     saveData(); // ドラッグまたはリサイズが終了したらデータを保存
-                    // 画面の再描画は必要に応じて行う
-                    // renderGanttChart(); // コメントアウト: マウスアップ毎の再描画はパフォーマンスが悪い。手動でリロードを推奨。
+                    // 完了後、ガントチャートを再描画して最新の状態にリフレッシュ（オプション）
+                    // renderGanttChart();
                 }
 
                 isDragging = false;
                 draggingBar = null;
                 isResizing = false;
                 resizingBar = null;
-                resizingTask = null;
+                resizingTask = null; // グローバル変数をクリア
 
                 document.body.style.cursor = 'default';
                 document.body.style.userSelect = 'auto';
@@ -2513,25 +2580,29 @@
             let startX, startY, startWidth, startHeight;
 
             // サイドバーリサイザー
-            sidebarResizer.addEventListener('mousedown', (e) => {
-                isResizingSidebar = true;
-                startX = e.clientX;
-                startWidth = sidebar.offsetWidth;
-                document.body.style.cursor = 'ew-resize';
-                document.body.style.userSelect = 'none';
-                e.preventDefault();
-            });
+            if (sidebarResizer) {
+                sidebarResizer.addEventListener('mousedown', (e) => {
+                    isResizingSidebar = true;
+                    startX = e.clientX;
+                    startWidth = sidebar.offsetWidth;
+                    document.body.style.cursor = 'ew-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+            }
 
             // ヘッダーリサイザー
-            headerResizer.addEventListener('mousedown', (e) => {
-                isResizingHeader = true;
-                startY = e.clientY;
-                // 現在のパディングに基づいて高さを概算
-                startHeight = contentHeader.offsetHeight;
-                document.body.style.cursor = 'ns-resize';
-                document.body.style.userSelect = 'none';
-                e.preventDefault();
-            });
+            if (headerResizer) {
+                headerResizer.addEventListener('mousedown', (e) => {
+                    isResizingHeader = true;
+                    startY = e.clientY;
+                    // 現在のパディングに基づいて高さを概算
+                    startHeight = contentHeader.offsetHeight;
+                    document.body.style.cursor = 'ns-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+            }
 
             // マウス移動
             document.addEventListener('mousemove', (e) => {
@@ -2540,24 +2611,31 @@
                     if (width >= 200 && width <= 500) {
                         sidebar.style.width = width + 'px';
                         TASK_COL_WIDTH = width; // ガントチャートのタスク名列幅と連動
-                        renderGanttChart();
+                        // リアルタイム描画はパフォーマンスコストが高いため、mouseup時に描画しても良い
+                        // renderGanttChart(); 
                     }
                 } else if (isResizingHeader) {
                     const newHeight = startHeight + (e.clientY - startY);
                     if (newHeight >= 50 && newHeight <= 200) {
                          // パディングで高さを調整
-                        const paddingY = (newHeight - 40) / 2; // 40はコンテンツの高さの目安
-                        contentHeader.style.padding = `${paddingY}px 24px ${paddingY}px 24px`;
+                        const paddingV = Math.max(8, (newHeight - 40) / 2); // 8pxが最小
+                        contentHeader.style.padding = `${paddingV}px 24px ${paddingV}px 24px`;
                         HEADER_HEIGHT = newHeight;
                         
                         // ガントチャートの max-height も調整
-                        document.querySelector('.gantt-container').style.maxHeight = `calc(100vh - ${newHeight + 10}px)`;
+                        const ganttContainer = document.querySelector('.gantt-container');
+                        if(ganttContainer) {
+                            ganttContainer.style.maxHeight = `calc(100vh - ${newHeight + 10}px)`;
+                        }
                     }
                 }
             });
 
             // マウスアップ
             document.addEventListener('mouseup', () => {
+                if (isResizingSidebar) {
+                    renderGanttChart(); // サイドバーの幅変更後にガントチャートを再描画
+                }
                 isResizingSidebar = false;
                 isResizingHeader = false;
                 document.body.style.cursor = 'default';
@@ -2568,12 +2646,12 @@
 
         // 初期処理
         window.onload = function() {
-            // 初期表示をログイン画面にするため、最初にcheckLogin()
-            checkLogin(); 
+            // ⭐ 修正: HTML要素がロードされてからJS関数を呼び出すことでReferenceErrorを回避
             initializeStoreSelector();
             setupFileImport();
             setupResizers();
-            // loadData() は checkLogin() -> showApp() の中で呼ばれます
+            // 最後にログインチェックを実行（データのロードはcheckLogin/showApp内で行われる）
+            checkLogin();
         };
 
     </script>
