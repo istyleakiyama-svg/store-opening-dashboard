@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I-STYLE 新店ダッシュボード - 最終修正版</title>
+    <title>I-STYLE 新店ダッシュボード - 権限管理デモ</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
     <style>
         /* CSSリセットと変数定義 */
         * {
@@ -29,19 +30,19 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
             background: var(--background);
-            color: var(--text-primary);\nline-height: 1.6;
-            /* ページ全体の最小高さを設定 */
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
         }
 
         /* レイアウト */
         .container {
             display: flex;
-            height: calc(100vh - var(--header-height)); /* ヘッダーの高さを引く */
+            height: calc(100vh - 60px); /* ヘッダーの初期高さを引く */
         }
 
         .sidebar {
-            width: 300px; /* 初期幅 */
+            width: 300px;
             min-width: 200px;
             max-width: 500px;
             background: var(--surface);
@@ -49,10 +50,10 @@
             padding: 24px 0;
             display: flex;
             flex-direction: column;
-            resize: horizontal; /* CSSによるリサイズ（JSで強化） */
+            resize: horizontal;
             overflow: hidden;
             position: relative;
-            transition: width 0.3s ease; /* サイドバー開閉用 */
+            transition: width 0.3s ease;
         }
 
         .sidebar-resizer {
@@ -73,8 +74,7 @@
 
         /* ヘッダー */
         .content-header {
-            --header-height: 60px; /* JSで可変 */
-            height: var(--header-height);
+            height: 60px;
             min-height: 50px;
             max-height: 200px;
             background: var(--surface);
@@ -82,7 +82,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 24px; /* 初期値 */
+            padding: 8px 24px;
             position: relative;
             overflow: hidden;
             transition: height 0.3s ease;
@@ -111,11 +111,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .store-selector label {
-            font-size: 14px;
-            color: var(--text-secondary);
         }
 
         .store-selector select {
@@ -158,13 +153,6 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
         .sidebar-list a {
             display: block;
             padding: 6px 0;
@@ -175,57 +163,20 @@
             border-radius: 4px;
         }
 
-        .sidebar-list a:hover {
-            background: var(--background);
-            padding-left: 5px;
-        }
-
         .sidebar-list a.active {
             font-weight: 600;
             color: var(--primary);
         }
-
-        /* ガントチャートエリア */
-        .gantt-container {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: var(--surface);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            /* JSで高さが設定されます */
-        }
-
-        .gantt-chart {
-            display: grid;
-            /* JSで動的に設定される */
-        }
-
-        /* エラーメッセージ */
-        .error-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background-color: var(--danger);
-            color: white;
-            border-radius: 10px;
-            z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            font-weight: bold;
-            text-align: center;
-        }
-
+        
         /* ローディング画面 */
-        #loading-overlay {
+        #loading-overlay, #login-form-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.9);
-            display: flex;
+            display: none; /* 初期非表示 */
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -248,32 +199,12 @@
         }
 
         /* ログイン画面 */
-        #login-form-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--background);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            flex-direction: column;
-        }
-
         .login-box {
             background: var(--surface);
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             width: 350px;
-        }
-
-        .login-box h2 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 20px;
         }
 
         .login-box input {
@@ -298,14 +229,10 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-
-        .login-box button:hover {
-            background: #0056b3;
-        }
-
+        
         /* ガントチャートのスタイル（簡略化） */
-        .gantt-row {
-            display: contents;
+        .gantt-chart {
+            display: grid;
         }
 
         .gantt-cell {
@@ -330,19 +257,12 @@
             cursor: pointer;
             position: relative;
         }
-
-        .header-cell {
-            background-color: var(--background);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 5;
-        }
     </style>
 </head>
+
 <body>
 
-    <div id="login-form-container" style="display: none;">
+    <div id="login-form-container">
         <div class="login-box">
             <h2>ダッシュボードへログイン</h2>
             <form id="login-form">
@@ -350,10 +270,16 @@
                 <input type="password" id="password" placeholder="パスワード" required>
                 <button type="submit">ログイン</button>
             </form>
+            <p style="margin-top: 15px; font-size: 14px; text-align: center; color: var(--text-secondary);">
+                テストユーザー名: 
+                <br>admin (全編集可能), 
+                <br>editor (自分の担当のみ編集可能), 
+                <br>viewer (閲覧のみ)
+            </p>
         </div>
     </div>
 
-    <div id="loading-overlay" style="display: none;">
+    <div id="loading-overlay">
         <div class="spinner"></div>
         <p>データをロード中です...</p>
     </div>
@@ -384,7 +310,7 @@
                         <a href="#">進捗サマリー</a>
                     </div>
                 </div>
-                <div class="sidebar-section" id="admin-settings-section" style="display: none;">
+                <div class="sidebar-section" id="admin-settings-section">
                     <h3>管理設定</h3>
                     <div class="sidebar-list">
                         <a href="#">ユーザー管理</a>
@@ -406,56 +332,36 @@
     <script>
         // グローバル変数
         let CURRENT_STORE = 'S001';
-        let SIDEBAR_WIDTH = 300; // 初期サイドバー幅
-        let HEADER_HEIGHT = 60;  // 初期ヘッダー高さ
-        let STORE_DATA = {};     // 全店舗のデータ
-        let IS_LOGGED_IN = false;
-        
-        // ⭐ 新規追加: 権限管理の定義とチェック
-        // 【重要】本来は、ログイン成功時にバックエンドから取得したユーザーの役割をここに設定します。
-        // デモンストレーションのため、デフォルトで 'editor' に設定します。
-        // ① 全編集可能: 'administrator'
-        // ② 自分の担当のみ編集可能: 'editor'
-        // ③ 閲覧のみ: 'viewer'
-        const CURRENT_USER_ROLE = 'editor'; 
+        let CURRENT_USER_ROLE = 'viewer'; // 初期値。ログイン後に上書きされる想定
 
 
         /**
          * ユーザーが指定された権限を持つロールであるかをチェックする
+         * ① 全編集可能 (administrator), ② 自分の担当のみ編集可能 (editor), ③ 閲覧のみ (viewer)
          * @param {string} requiredRole - 必要な役割 ('administrator', 'editor', 'viewer')
-         * @param {boolean} allowHigher - より高い権限（administrator）も許可するか
          * @returns {boolean} 権限があるか
          */
-        function checkRolePermission(requiredRole, allowHigher = true) {
+        function checkRolePermission(requiredRole) {
             const roleOrder = ['viewer', 'editor', 'administrator'];
             const userIndex = roleOrder.indexOf(CURRENT_USER_ROLE);
             const requiredIndex = roleOrder.indexOf(requiredRole);
 
-            if (requiredIndex === -1) return false; // 無効なロール
+            if (requiredIndex === -1) return false; 
 
-            if (allowHigher) {
-                // 必要なレベル以上の全てのロールを許可
-                return userIndex >= requiredIndex;
-            } else {
-                // 厳密にそのレベルのみを許可
-                return userIndex === requiredIndex;
-            }
+            // 必要なレベル以上の全てのロールを許可
+            return userIndex >= requiredIndex;
         }
-        // ⭐ 新規追加: 権限管理の定義とチェック 終了
-        
-        
+
+
         /**
-         * 擬似的なログインチェック
+         * ログイン状態の確認と処理
          */
         function checkLogin() {
             const loggedInStatus = localStorage.getItem('isLoggedIn');
-            const userRole = localStorage.getItem('userRole'); // ログイン時に役割も保存する想定
+            const userRole = localStorage.getItem('userRole'); 
             
-            // ログイン済みであればダッシュボードを表示
             if (loggedInStatus === 'true' && userRole) {
-                IS_LOGGED_IN = true;
-                // ⭐ 修正: グローバル変数をローカルストレージの値で上書き（本番環境の動作をシミュレート）
-                // CURRENT_USER_ROLE = userRole; 
+                CURRENT_USER_ROLE = userRole; 
                 showApp();
             } else {
                 showLoginForm();
@@ -463,121 +369,164 @@
         }
 
         /**
-         * 擬似的なログイン処理
+         * ログインフォームの表示
          */
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            // ユーザー名に基づいて擬似的に役割を決定
-            let role = 'viewer';
-            if (username === 'admin') {
-                role = 'administrator';
-            } else if (username === 'editor') {
-                role = 'editor';
+        function showLoginForm() {
+            document.getElementById('login-form-container').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+        }
+
+        /**
+         * アプリケーション本体の表示と初期化
+         */
+        function showApp() {
+            document.getElementById('login-form-container').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+
+            // ⭐ UI制御 1: 管理設定セクションの表示
+            const adminSection = document.getElementById('admin-settings-section');
+            if (checkRolePermission('administrator')) {
+                adminSection.style.display = 'block'; // ① 管理者のみ表示
             } else {
-                role = 'viewer';
+                adminSection.style.display = 'none';
             }
             
-            // ログイン状態と役割を保存
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userRole', role);
-            
-            // ⭐ 修正: グローバル変数をここで設定
-            // CURRENT_USER_ROLE = role; 
-            
-            checkLogin();
+            // 各種初期化を実行
+            initializeStoreSelector();
+            setupFileImport();
+            setupResizers();
+            loadData(); 
+        }
+        
+        // --- イベントリスナー ---
+
+        // ログイン処理
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value;
+                    
+                    // ユーザー名に基づいて擬似的に役割を決定
+                    let role = 'viewer';
+                    if (username === 'admin') {
+                        role = 'administrator'; 
+                    } else if (username === 'editor') {
+                        role = 'editor'; 
+                    } else {
+                        role = 'viewer'; 
+                    }
+                    
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userRole', role);
+                    
+                    checkLogin();
+                });
+            }
         });
 
-
-        // ... (他の関数は省略。元のコードのまま) ...
-
-        /**
-         * ログアウト処理
-         */
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userRole');
-            window.location.reload();
+        // ログアウト処理
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userRole');
+                    window.location.reload();
+                });
+            }
         });
 
+        // --- 機能関連関数 ---
 
         /**
-         * ファイルインポート処理のセットアップ
+         * ファイルインポート処理のセットアップと権限チェック
          */
         function setupFileImport() {
             const importBtn = document.getElementById('importBtn');
             const fileInput = document.getElementById('fileInput');
             
-            // ⭐ 権限チェックを追加: administrator または editor のみファイルインポートを許可
-            if (checkRolePermission('editor')) { // editor以上の権限があるか
+            // ⭐ UI制御 2: データインポートボタンの表示と機能有効化
+            if (checkRolePermission('editor')) { // editor 以上の権限があるか (①, ②)
                 importBtn.style.display = 'block'; // ボタンを表示
                 
-                // クリックイベントをバインド
+                // 機能のバインド
                 importBtn.addEventListener('click', () => {
                     fileInput.click();
                 });
 
                 fileInput.addEventListener('change', (event) => {
                     if (event.target.files.length > 0) {
-                        handleFile(event.target.files[0]);
+                        alert('ファイルが正常にインポートされました (擬似処理)');
+                        setTimeout(renderGanttChart, 100);
                     }
                 });
-
-                function handleFile(file) {
-                    // ... (元の複雑なファイル読み込みロジックは省略) ...
-                    // 成功メッセージ表示
-                    showTemporaryMessage('ファイルが正常にインポートされました (擬似処理)', 'success');
-                    // データロード後、ガントチャートを再描画
-                    setTimeout(() => {
-                        renderGanttChart();
-                    }, 100);
-                }
 
             } else {
                 // viewer の場合、ボタンを非表示にする (③ 閲覧のみ)
                 importBtn.style.display = 'none';
             }
         }
+        
+        /**
+         * データのロード（擬似）
+         */
+        function loadData() {
+            // 擬似データロード
+            renderGanttChart();
+        }
 
         /**
-         * アプリケーション本体を表示し、各種初期化を実行
+         * ストアセレクターの初期化（擬似）
          */
-        function showApp() {
-            document.getElementById('login-form-container').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-
-            // ⭐ 権限チェックを追加: 管理設定セクションの表示制御
-            const adminSection = document.getElementById('admin-settings-section');
-            if (checkRolePermission('administrator')) {
-                adminSection.style.display = 'block'; // ① 全編集可能 のみに表示
-            } else {
-                adminSection.style.display = 'none';
+        function initializeStoreSelector() {
+            const selector = document.getElementById('store-select');
+            if (selector) {
+                ['S001 - 銀座', 'S002 - 新宿', 'S003 - 渋谷'].forEach(store => {
+                    const option = document.createElement('option');
+                    option.value = store.split(' ')[0];
+                    option.textContent = store;
+                    selector.appendChild(option);
+                });
+                selector.addEventListener('change', (e) => {
+                    CURRENT_STORE = e.target.value;
+                    renderGanttChart();
+                });
             }
+        }
 
-            // ... (他の初期化処理は省略) ...
+        /**
+         * ガントチャートの描画（擬似）
+         */
+        function renderGanttChart() {
+            const gantt = document.getElementById('gantt-chart');
+            if (gantt) {
+                gantt.innerHTML = `<h2>${CURRENT_STORE} の計画</h2>
+                                   <p style="margin-top: 10px;">現在の役割: **${CURRENT_USER_ROLE}**</p>
+                                   <div class="gantt-cell task-bar" style="grid-column: 5 / 10;">重要タスクA</div>
+                                   <div class="gantt-cell task-bar" style="grid-column: 12 / 18; background-color: var(--warning);">重要タスクB</div>`;
+                gantt.style.gridTemplateColumns = `200px repeat(30, 1fr)`; // 擬似的な列設定
+            }
         }
         
+        // --- UI調整関数 ---
         
-        // ... (元のその他の関数は省略) ...
-
-
         /**
-         * リサイズ機能のセットアップ (元のコードのまま)
+         * リサイズ機能のセットアップ（簡略化）
          */
         function setupResizers() {
             const sidebar = document.getElementById('sidebar');
             const resizerSidebar = document.querySelector('.sidebar-resizer');
             const contentHeader = document.querySelector('.content-header');
             const resizerHeader = document.querySelector('.header-resizer');
-            const container = document.querySelector('.container');
             let isResizingSidebar = false;
             let isResizingHeader = false;
-
+            
             // マウスダウン（サイドバー）
             resizerSidebar.addEventListener('mousedown', (e) => {
                 isResizingSidebar = true;
                 document.body.style.cursor = 'ew-resize';
-                document.body.style.userSelect = 'none';
                 e.preventDefault();
             });
 
@@ -585,7 +534,6 @@
             resizerHeader.addEventListener('mousedown', (e) => {
                 isResizingHeader = true;
                 document.body.style.cursor = 'ns-resize';
-                document.body.style.userSelect = 'none';
                 e.preventDefault();
             });
 
@@ -595,18 +543,15 @@
                     const newWidth = e.clientX;
                     if (newWidth >= 200 && newWidth <= 500) {
                         sidebar.style.width = `${newWidth}px`;
-                        SIDEBAR_WIDTH = newWidth;
                     }
                 } else if (isResizingHeader) {
                     const newHeight = e.clientY;
-                    // ヘッダーの最小50px、最大200px
                     if (newHeight >= 50 && newHeight <= 200) {
-                         // パディングで高さを調整
-                        const paddingV = Math.max(8, (newHeight - 40) / 2); // 8pxが最小
+                         // パディングで高さを調整してヘッダー高さを変更
+                        const paddingV = Math.max(8, (newHeight - 40) / 2);
                         contentHeader.style.padding = `${paddingV}px 24px ${paddingV}px 24px`;
-                        HEADER_HEIGHT = newHeight;
                         
-                        // ガントチャートの max-height も調整
+                        // ガントチャートの max-height も調整（簡略化）
                         const ganttContainer = document.querySelector('.gantt-container');
                         if(ganttContainer) {
                             ganttContainer.style.maxHeight = `calc(100vh - ${newHeight + 10}px)`;
@@ -617,27 +562,18 @@
 
             // マウスアップ
             document.addEventListener('mouseup', () => {
-                if (isResizingSidebar) {
-                    renderGanttChart(); // サイドバーの幅変更後にガントチャートを再描画
-                }
                 isResizingSidebar = false;
                 isResizingHeader = false;
                 document.body.style.cursor = 'default';
-                document.body.style.userSelect = 'auto';
+                if (isResizingSidebar) renderGanttChart(); 
             });
         }
 
 
-        // 初期処理
+        // ページロード時の最終処理
         window.onload = function() {
-            // ⭐ 修正: HTML要素がロードされてからJS関数を呼び出すことでReferenceErrorを回避
-            initializeStoreSelector();
-            setupFileImport(); // 👈 ここで権限チェックが実行されます
-            setupResizers();
-            // 最後にログインチェックを実行（データのロードはcheckLogin/showApp内で行われる）
-            checkLogin();
+            checkLogin(); 
         };
-
     </script>
 </body>
 </html>
