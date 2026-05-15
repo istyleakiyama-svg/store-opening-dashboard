@@ -175,6 +175,11 @@
             color: #991B1B;
         }
 
+        .shift-paid {
+            background: #EDE9FE;
+            color: #5B21B6;
+        }
+
         /* 時間帯バー（視覚的） */
         td.bar-cell {
             width: 200px;
@@ -243,6 +248,15 @@
         .dot-off    { background: #FF3B30; }
         .dot-sat    { background: #007AFF; }
         .dot-sun    { background: #FF3B30; }
+        .dot-paid   { background: #7C3AED; }
+
+        /* 備考 */
+        td.note-cell {
+            font-size: 12px;
+            color: #7C3AED;
+            text-align: left;
+            padding-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -270,6 +284,10 @@
             <div class="label">遅番（8時〜）</div>
             <div class="value" id="stat-late">—</div>
         </div>
+        <div class="stat-card" style="--val-color:#5B21B6;">
+            <div class="label">有給</div>
+            <div class="value" id="stat-paid" style="color:#5B21B6;">—</div>
+        </div>
     </div>
 
     <div class="schedule-wrapper">
@@ -280,6 +298,7 @@
                     <th>曜日</th>
                     <th>シフト</th>
                     <th>勤務時間帯</th>
+                    <th>備考</th>
                 </tr>
             </thead>
             <tbody id="schedule-body">
@@ -290,6 +309,7 @@
             <div class="legend-item"><div class="legend-dot dot-early"></div> 早番（7時〜）</div>
             <div class="legend-item"><div class="legend-dot dot-late"></div> 遅番（8時〜）</div>
             <div class="legend-item"><div class="legend-dot dot-off"></div> 休日</div>
+            <div class="legend-item"><div class="legend-dot dot-paid"></div> 有給休暇</div>
             <div class="legend-item"><div class="legend-dot dot-sat"></div> 土曜</div>
             <div class="legend-item"><div class="legend-dot dot-sun"></div> 日曜</div>
         </div>
@@ -301,7 +321,7 @@
             { date: 16, day: '土', shift: 'off' },
             { date: 17, day: '日', shift: '7～' },
             { date: 18, day: '月', shift: '7～' },
-            { date: 19, day: '火', shift: '7～' },
+            { date: 19, day: '火', shift: '有給', note: '東京医科大学病院（医師説明）' },
             { date: 20, day: '水', shift: '7～' },
             { date: 21, day: '木', shift: 'off' },
             { date: 22, day: '金', shift: '8～' },
@@ -332,8 +352,9 @@
         }
 
         function shiftBadge(shift) {
-            if (shift === 'off') return { cls: 'shift-off', label: '休日' };
-            if (shift === '7～') return { cls: 'shift-early', label: '7:00〜' };
+            if (shift === 'off')  return { cls: 'shift-off',   label: '休日' };
+            if (shift === '有給') return { cls: 'shift-paid',  label: '有給' };
+            if (shift === '7～')  return { cls: 'shift-early', label: '7:00〜' };
             return { cls: 'shift-late', label: '8:00〜' };
         }
 
@@ -351,7 +372,7 @@
 
         // テーブル描画
         const tbody = document.getElementById('schedule-body');
-        let countWork = 0, countOff = 0, countEarly = 0, countLate = 0;
+        let countWork = 0, countOff = 0, countEarly = 0, countLate = 0, countPaid = 0;
 
         scheduleData.forEach(row => {
             const tr = document.createElement('tr');
@@ -373,17 +394,24 @@
                 barHtml = '<span style="color:#CBD5E0; font-size:13px;">—</span>';
             }
 
+            const noteHtml = row.note
+                ? `🏥 ${row.note}`
+                : '';
+
             tr.innerHTML = `
                 <td class="date-cell">${row.date}日</td>
                 <td class="day-cell"><span class="${dayCellClass(row.day)}">${row.day}</span></td>
                 <td><span class="shift-badge ${badge.cls}">${badge.label}</span></td>
                 <td class="bar-cell">${barHtml}</td>
+                <td class="note-cell">${noteHtml}</td>
             `;
             tbody.appendChild(tr);
 
             // 統計集計
             if (row.shift === 'off') {
                 countOff++;
+            } else if (row.shift === '有給') {
+                countPaid++;
             } else {
                 countWork++;
                 if (row.shift === '7～') countEarly++;
@@ -396,6 +424,7 @@
         document.getElementById('stat-off').textContent   = countOff   + '日';
         document.getElementById('stat-early').textContent = countEarly + '日';
         document.getElementById('stat-late').textContent  = countLate  + '日';
+        document.getElementById('stat-paid').textContent  = countPaid  + '日';
     </script>
 </body>
 </html>
