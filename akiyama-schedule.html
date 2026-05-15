@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秋山 シフト表 - 2026年5月</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Helvetica Neue', Arial, sans-serif;
+            background: #F0F4F8;
+            color: #1A1A2E;
+            min-height: 100vh;
+            padding: 32px 16px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #007AFF;
+            letter-spacing: 0.04em;
+        }
+
+        .page-header p {
+            margin-top: 6px;
+            font-size: 15px;
+            color: #6B7280;
+        }
+
+        /* 統計バー */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 14px 24px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 120px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .stat-card.work .value  { color: #007AFF; }
+        .stat-card.off  .value  { color: #FF3B30; }
+        .stat-card.early .value { color: #34C759; }
+        .stat-card.late  .value { color: #FF9500; }
+
+        /* スケジュールテーブル */
+        .schedule-wrapper {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #FFFFFF;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+        }
+
+        thead tr {
+            background: #007AFF;
+            color: white;
+        }
+
+        thead th {
+            padding: 14px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #F0F4F8;
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #F7FAFF;
+        }
+
+        /* 土日の行を色分け */
+        tbody tr.saturday {
+            background: #EBF4FF;
+        }
+        tbody tr.saturday:hover {
+            background: #D6EBFF;
+        }
+        tbody tr.sunday {
+            background: #FFF0F0;
+        }
+        tbody tr.sunday:hover {
+            background: #FFE0E0;
+        }
+
+        td {
+            padding: 12px 14px;
+            font-size: 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        td.date-cell {
+            font-weight: 700;
+            font-size: 17px;
+            width: 60px;
+        }
+
+        td.day-cell {
+            font-size: 14px;
+            width: 44px;
+            font-weight: 500;
+        }
+
+        .day-sat { color: #007AFF; }
+        .day-sun { color: #FF3B30; }
+        .day-weekday { color: #555; }
+
+        /* シフトバッジ */
+        .shift-badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 100px;
+            letter-spacing: 0.02em;
+        }
+
+        .shift-early {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .shift-late {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .shift-off {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        /* 時間帯バー（視覚的） */
+        td.bar-cell {
+            width: 200px;
+            padding: 12px 10px;
+        }
+
+        .time-bar-wrap {
+            position: relative;
+            background: #F0F4F8;
+            border-radius: 6px;
+            height: 18px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .time-bar {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .bar-early { background: #34C759; }
+        .bar-late  { background: #FF9500; }
+
+        .time-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 3px rgba(0,0,0,0.4);
+        }
+
+        /* 凡例 */
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .dot-early  { background: #34C759; }
+        .dot-late   { background: #FF9500; }
+        .dot-off    { background: #FF3B30; }
+        .dot-sat    { background: #007AFF; }
+        .dot-sun    { background: #FF3B30; }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>秋山 シフト表</h1>
+        <p>2026年5月（16日〜31日）</p>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="stats-row">
+        <div class="stat-card work">
+            <div class="label">出勤日数</div>
+            <div class="value" id="stat-work">—</div>
+        </div>
+        <div class="stat-card off">
+            <div class="label">休日</div>
+            <div class="value" id="stat-off">—</div>
+        </div>
+        <div class="stat-card early">
+            <div class="label">早番（7時〜）</div>
+            <div class="value" id="stat-early">—</div>
+        </div>
+        <div class="stat-card late">
+            <div class="label">遅番（8時〜）</div>
+            <div class="value" id="stat-late">—</div>
+        </div>
+    </div>
+
+    <div class="schedule-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>曜日</th>
+                    <th>シフト</th>
+                    <th>勤務時間帯</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body">
+            </tbody>
+        </table>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot dot-early"></div> 早番（7時〜）</div>
+            <div class="legend-item"><div class="legend-dot dot-late"></div> 遅番（8時〜）</div>
+            <div class="legend-item"><div class="legend-dot dot-off"></div> 休日</div>
+            <div class="legend-item"><div class="legend-dot dot-sat"></div> 土曜</div>
+            <div class="legend-item"><div class="legend-dot dot-sun"></div> 日曜</div>
+        </div>
+    </div>
+
+    <script>
+        // 画像から読み取った秋山さんのシフトデータ（2026年5月16日〜31日）
+        const scheduleData = [
+            { date: 16, day: '土', shift: 'off' },
+            { date: 17, day: '日', shift: '7～' },
+            { date: 18, day: '月', shift: '7～' },
+            { date: 19, day: '火', shift: '7～' },
+            { date: 20, day: '水', shift: '7～' },
+            { date: 21, day: '木', shift: 'off' },
+            { date: 22, day: '金', shift: '8～' },
+            { date: 23, day: '土', shift: '8～' },
+            { date: 24, day: '日', shift: '8～' },
+            { date: 25, day: '月', shift: '7～' },
+            { date: 26, day: '火', shift: 'off' },
+            { date: 27, day: '水', shift: '7～' },
+            { date: 28, day: '木', shift: '7～' },
+            { date: 29, day: '金', shift: '8～' },
+            { date: 30, day: '土', shift: 'off' },
+            { date: 31, day: '日', shift: '8～' },
+        ];
+
+        // 時間帯バーの幅計算（8時〜21時を100%とした相対位置）
+        // 表示幅の基準: 7:00〜21:00 = 14時間 = 100%
+        const RANGE_START = 7;
+        const RANGE_END   = 21;
+        const RANGE_TOTAL = RANGE_END - RANGE_START;
+
+        function shiftToBar(shift) {
+            if (shift === 'off') return null;
+            const start = shift === '7～' ? 7 : 8;
+            const end   = 16; // 標準終了時刻
+            const left  = ((start - RANGE_START) / RANGE_TOTAL) * 100;
+            const width = ((end   - start)       / RANGE_TOTAL) * 100;
+            return { left, width, cls: start === 7 ? 'bar-early' : 'bar-late' };
+        }
+
+        function shiftBadge(shift) {
+            if (shift === 'off') return { cls: 'shift-off', label: '休日' };
+            if (shift === '7～') return { cls: 'shift-early', label: '7:00〜' };
+            return { cls: 'shift-late', label: '8:00〜' };
+        }
+
+        function dayClass(day) {
+            if (day === '土') return 'saturday';
+            if (day === '日') return 'sunday';
+            return '';
+        }
+
+        function dayCellClass(day) {
+            if (day === '土') return 'day-sat';
+            if (day === '日') return 'day-sun';
+            return 'day-weekday';
+        }
+
+        // テーブル描画
+        const tbody = document.getElementById('schedule-body');
+        let countWork = 0, countOff = 0, countEarly = 0, countLate = 0;
+
+        scheduleData.forEach(row => {
+            const tr = document.createElement('tr');
+            if (dayClass(row.day)) tr.classList.add(dayClass(row.day));
+
+            const badge = shiftBadge(row.shift);
+            const bar   = shiftToBar(row.shift);
+
+            let barHtml = '';
+            if (bar) {
+                barHtml = `
+                    <div class="time-bar-wrap">
+                        <div class="time-bar ${bar.cls}"
+                             style="left:${bar.left.toFixed(1)}%; width:${bar.width.toFixed(1)}%">
+                        </div>
+                        <div class="time-label">${badge.label} 〜 16:00</div>
+                    </div>`;
+            } else {
+                barHtml = '<span style="color:#CBD5E0; font-size:13px;">—</span>';
+            }
+
+            tr.innerHTML = `
+                <td class="date-cell">${row.date}日</td>
+                <td class="day-cell"><span class="${dayCellClass(row.day)}">${row.day}</span></td>
+                <td><span class="shift-badge ${badge.cls}">${badge.label}</span></td>
+                <td class="bar-cell">${barHtml}</td>
+            `;
+            tbody.appendChild(tr);
+
+            // 統計集計
+            if (row.shift === 'off') {
+                countOff++;
+            } else {
+                countWork++;
+                if (row.shift === '7～') countEarly++;
+                else countLate++;
+            }
+        });
+
+        // 統計表示
+        document.getElementById('stat-work').textContent  = countWork  + '日';
+        document.getElementById('stat-off').textContent   = countOff   + '日';
+        document.getElementById('stat-early').textContent = countEarly + '日';
+        document.getElementById('stat-late').textContent  = countLate  + '日';
+    </script>
+</body>
+</html>
